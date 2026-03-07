@@ -1,0 +1,20 @@
+{
+  "skill_name": "jp",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/jp",
+      "expected_output": "첫 실행이면 셋업 시작 (레벨/목표 질문). 이미 진도가 있으면 상태 기반 추천."
+    },
+    {
+      "id": 2,
+      "prompt": "/jp N4 문법 퀴즈 내줘",
+      "expected_output": "N4 레벨 문법 4지선다 퀴즈 4문제 생성. quiz-rules.md 규칙 준수."
+    },
+    {
+      "id": 3,
+      "prompt": "/jp 편의점에서 물건 사는 상황으로 회화 연습하고 싶어",
+      "expected_output": "편의점 시나리오 텍스트 회화 시뮬레이션 시작. Claude가 점원 역할."
+    }
+  ]
+}
