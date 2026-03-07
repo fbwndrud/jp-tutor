@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "일본어 학습 튜터 플러그인 마켓플레이스",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "pluginRoot": "./"
   },
   "plugins": [
