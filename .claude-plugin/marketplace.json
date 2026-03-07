@@ -1,0 +1,13 @@
+{
+  "name": "jp-tutor",
+  "owner": {
+    "name": "lyoojk"
+  },
+  "plugins": [
+    {
+      "name": "jp-tutor",
+      "source": ".",
+      "description": "일본어 학습 튜터. /jp 명령으로 어휘/문법/한자/독해/작문/번역/회화/문화를 학습하고, JLPT 개념별 마스터리를 추적합니다."
+    }
+  ]
+}
