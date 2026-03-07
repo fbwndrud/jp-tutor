@@ -9,7 +9,7 @@ argument-hint: "[학습 모드 또는 자유 입력]"
 
 사용자 입력: $ARGUMENTS
 
-스킬 `jp`의 SKILL.md 가이드라인을 따라 세션을 진행하세요.
+스킬 `japanese-tutor`의 SKILL.md 가이드라인을 따라 세션을 진행하세요.
 
 ## 사용 예시
 
