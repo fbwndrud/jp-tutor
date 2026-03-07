@@ -134,8 +134,8 @@ jp-tutor/
 │       ├── grading-rubrics.md                 # 채점/피드백 기준
 │       └── curricula/
 │           └── japanese-jlpt.md               # JLPT N5-N1 커리큘럼
-├── slash-commands/
-│   └── jp.md                                  # /jp 슬래시 커맨드
+├── commands/
+│   └── jp.md                                  # /jp 커맨드
 └── evals/                                     # 스킬 평가 테스트
     ├── evals.json
     └── trigger-eval.json
