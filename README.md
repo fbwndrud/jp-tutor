@@ -1,16 +1,19 @@
 # jp-tutor
 
-일본어 학습 튜터 Claude Code 플러그인.
+일본어 학습 튜터 Claude Cowork 플러그인.
 
 `/jp` 명령 하나로 어휘/문법/한자/독해/작문/번역/회화/문화를 학습하고, JLPT 개념별 마스터리를 추적합니다.
 
 ## 설치
 
-Claude Code에서 플러그인을 추가합니다:
+Claude Cowork에서 URL로 마켓플레이스를 추가합니다:
 
-```bash
-claude plugin add fbwndrud/jp-tutor
-```
+1. **설정** → **플러그인** → **URL로 마켓플레이스 추가**
+2. 아래 URL 입력:
+   ```
+   https://github.com/fbwndrud/jp-tutor.git
+   ```
+3. `jp-tutor` 플러그인을 설치
 
 설치 후 `/jp`가 사용 가능합니다.
 
