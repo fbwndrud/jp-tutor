@@ -1,6 +1,6 @@
 {
   "name": "jp-tutor",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "description": "일본어 학습 튜터. JLPT/비즈니스/교재 기반 학습, 개념별 마스터리 추적, 에빙하우스 복습, 게이미피케이션.",
   "author": { "name": "lyoojk" }
 }
