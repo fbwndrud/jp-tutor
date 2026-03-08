@@ -10,7 +10,7 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 전체]"
 ## 사전 준비
 
 1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요. (특히 TTS 섹션 확인)
-2. TTS 사용 가능 여부를 확인합니다 (SKILL.md TTS 섹션 참조).
+2. TTS 환경을 감지합니다 (SKILL.md TTS 섹션 참조). 원격 환경이면 세션 종료 시 HTML TTS 플레이어를 생성합니다.
 3. `jp-data/progress.json`을 읽으세요.
    - 파일이 없으면: "아직 초기 설정이 되어 있지 않습니다. `/jp:start`로 시작해주세요!" 라고 안내하고 종료합니다.
 3. `skills/jp/references/quiz-rules.md`를 읽어 퀴즈 규칙을 숙지하세요.

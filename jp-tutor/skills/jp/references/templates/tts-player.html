@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>발음 플레이어</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --text: #2c3e50;
+  --text-secondary: #6c757d;
+  --border: #e9ecef;
+  --accent: #4A90D9;
+  --accent-hover: #357ABD;
+  --green: #27AE60;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a2e;
+    --bg-card: #16213e;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b0;
+    --border: #2a2a4a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 16px;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.3rem;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-control {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-control:hover { background: var(--border); }
+.btn-control.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.speed-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.speed-row label { min-width: 40px; }
+
+.speed-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.speed-value {
+  min-width: 35px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.word-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.word-item:hover { border-color: var(--accent); }
+.word-item.playing { border-color: var(--accent); background: rgba(74,144,217,0.08); }
+
+.play-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.word-item.playing .play-icon { background: var(--green); }
+
+.word-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.word-jp {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.word-reading {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.word-meaning {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.no-tts {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+const DATA = null;
+
+(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA || !DATA.words || DATA.words.length === 0) {
+    app.innerHTML = '<div class="no-tts">데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  if (!('speechSynthesis' in window)) {
+    app.innerHTML = '<div class="no-tts">이 브라우저는 음성 합성을 지원하지 않습니다.<br>Chrome, Safari, Edge 등 최신 브라우저를 사용해주세요.</div>';
+    return;
+  }
+
+  var rate = DATA.rate || 0.8;
+  var isAutoPlaying = false;
+  var autoPlayIndex = 0;
+  var currentPlaying = -1;
+
+  function esc(s) {
+    if (s == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function speak(text, idx, onEnd) {
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = rate;
+
+    var voices = speechSynthesis.getVoices();
+    var jaVoice = voices.find(function(v) { return v.lang.startsWith('ja'); });
+    if (jaVoice) u.voice = jaVoice;
+
+    currentPlaying = idx;
+    render();
+
+    u.onend = function() {
+      currentPlaying = -1;
+      render();
+      if (onEnd) onEnd();
+    };
+
+    u.onerror = function() {
+      currentPlaying = -1;
+      render();
+      if (onEnd) onEnd();
+    };
+
+    speechSynthesis.speak(u);
+  }
+
+  function playAll() {
+    if (isAutoPlaying) {
+      isAutoPlaying = false;
+      speechSynthesis.cancel();
+      currentPlaying = -1;
+      render();
+      return;
+    }
+
+    isAutoPlaying = true;
+    autoPlayIndex = 0;
+    render();
+    playNext();
+  }
+
+  function playNext() {
+    if (!isAutoPlaying || autoPlayIndex >= DATA.words.length) {
+      isAutoPlaying = false;
+      currentPlaying = -1;
+      render();
+      return;
+    }
+
+    var word = DATA.words[autoPlayIndex];
+    speak(word.jp, autoPlayIndex, function() {
+      autoPlayIndex++;
+      if (isAutoPlaying) {
+        setTimeout(playNext, 600);
+      }
+    });
+  }
+
+  function render() {
+    var html = '';
+    html += '<h1>' + esc(DATA.title || '발음 플레이어') + '</h1>';
+    html += '<div class="subtitle">' + DATA.words.length + '개 단어 / 문장</div>';
+
+    html += '<div class="controls">';
+    html += '<button class="btn-control' + (isAutoPlaying ? ' active' : '') + '" id="btn-autoplay">' + (isAutoPlaying ? '정지' : '전체 재생') + '</button>';
+    html += '</div>';
+
+    html += '<div class="speed-row">';
+    html += '<label>속도</label>';
+    html += '<input type="range" class="speed-slider" id="speed" min="0.3" max="1.5" step="0.1" value="' + rate + '">';
+    html += '<span class="speed-value" id="speed-val">' + rate.toFixed(1) + 'x</span>';
+    html += '</div>';
+
+    html += '<div class="word-list">';
+    DATA.words.forEach(function(w, i) {
+      var playing = (currentPlaying === i) ? ' playing' : '';
+      html += '<div class="word-item' + playing + '" data-idx="' + i + '">';
+      html += '<div class="play-icon">' + (currentPlaying === i ? '||' : '\u25B6') + '</div>';
+      html += '<div class="word-text">';
+      html += '<div class="word-jp">' + esc(w.jp) + '</div>';
+      if (w.reading) html += '<div class="word-reading">' + esc(w.reading) + '</div>';
+      if (w.meaning) html += '<div class="word-meaning">' + esc(w.meaning) + '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+
+    app.innerHTML = html;
+    bindEvents();
+  }
+
+  function bindEvents() {
+    document.querySelectorAll('.word-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = parseInt(el.dataset.idx);
+        var word = DATA.words[idx];
+        isAutoPlaying = false;
+        speak(word.jp, idx);
+      });
+    });
+
+    var btn = document.getElementById('btn-autoplay');
+    if (btn) btn.addEventListener('click', playAll);
+
+    var slider = document.getElementById('speed');
+    if (slider) {
+      slider.addEventListener('input', function() {
+        rate = parseFloat(slider.value);
+        document.getElementById('speed-val').textContent = rate.toFixed(1) + 'x';
+      });
+    }
+  }
+
+  // Voices may load async
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = function() {};
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

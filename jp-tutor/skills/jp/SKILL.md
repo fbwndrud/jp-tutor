@@ -180,46 +180,74 @@ description: |
 
 ## TTS (음성 재생)
 
-학습 중 일본어 발음을 음성으로 들려줍니다. OS를 감지하여 적절한 TTS 엔진을 사용합니다.
+학습 중 일본어 발음을 음성으로 들려줍니다. 환경에 따라 적절한 방식을 선택합니다.
 
-### 세션 시작 시 TTS 초기화
+### 환경 감지 및 TTS 방식 결정
 
-세션 시작 시 한 번 OS를 감지하고 TTS 사용 가능 여부를 확인합니다:
+세션 시작 시 한 번 환경을 감지합니다:
 
 ```bash
-# macOS 확인
-if [[ "$(uname)" == "Darwin" ]]; then
-  say -v Kyoko "" 2>/dev/null && echo "TTS_OK"
+# 로컬 macOS인지 확인 (say 명령어로 직접 재생 가능)
+if [[ "$(uname)" == "Darwin" ]] && say -v Kyoko "" 2>/dev/null; then
+  echo "TTS_MODE=local_macos"
+else
+  echo "TTS_MODE=html"
 fi
 ```
 
-- **macOS**: `say -v Kyoko "일본어 텍스트"` (기본), 속도 조절: `say -v Kyoko -r 120 "느리게"`
-- **Windows**: `powershell -Command "Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Rate=-2; $s.Speak('일본어 텍스트')"`
-- **Linux**: `espeak-ng -v ja -s 120 "일본어 텍스트"` (설치 필요, 품질 낮음)
-- **TTS 불가 시**: 조용히 스킵. 에러 메시지 없이 텍스트만으로 진행.
+### 방식 1: 로컬 TTS (macOS에서 직접 실행 시)
+
+- `say -v Kyoko "일본어 텍스트"` — 즉시 재생
+- 속도 조절: `-r 100` (느림) ~ `-r 200` (빠름)
+- 백그라운드 실행: `say -v Kyoko "テスト" &`
+
+### 방식 2: HTML 기반 TTS (Cowork/원격 환경 — 기본값)
+
+Cowork 등 원격 Linux 환경에서는 CLI TTS가 유저 스피커에 도달하지 않습니다.
+대신 **HTML 파일에 Web Speech API를 내장**하여 유저 브라우저에서 직접 발음합니다.
+
+퀴즈/학습 세션에서 발음을 들려줘야 할 때, 다음과 같은 HTML 파일을 생성합니다:
+
+```html
+<button onclick="speak('こんにちは')">발음 듣기</button>
+<script>
+function speak(text) {
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 0.8; // 레벨별 조절
+  speechSynthesis.speak(u);
+}
+</script>
+```
+
+이 방식은 `jp-data/` 디렉토리에 HTML 파일로 저장하고 유저에게 열어보라고 안내합니다.
+- 파일명: `jp-data/tts-player.html`
+- 학습 세트의 모든 단어/문장을 버튼으로 나열
+- 자동 재생 옵션 포함 (전체 순서대로 재생)
 
 ### TTS 사용 타이밍
 
-다음 상황에서 자동으로 음성을 재생합니다:
+다음 상황에서 음성을 제공합니다:
 
-1. **새 단어/개념 소개 시**: 일본어 단어를 음성으로 한 번 들려줌
-2. **퀴즈 정답 공개 시**: 정답 단어/문장의 발음을 들려줌
-3. **가나 학습 시**: 새 문자의 발음을 들려줌 (예: `say -v Kyoko "あ"`)
-4. **예문 제시 시**: 일본어 예문을 음성으로 읽어줌
-5. **회화 시뮬레이션 시**: 상대방 발화를 음성으로 재생
+1. **새 단어/개념 소개 시**: 일본어 단어 발음
+2. **퀴즈 정답 공개 시**: 정답 단어/문장 발음
+3. **가나 학습 시**: 새 문자 발음
+4. **예문 제시 시**: 일본어 예문 읽기
+5. **회화 시뮬레이션 시**: 상대방 발화 재생
 
-### TTS 속도 조절
+### TTS 속도 (레벨별)
 
-학습자 레벨에 따라 속도를 조절합니다:
-- Pre-N5 ~ N5: 느리게 (macOS: `-r 100`, Windows: `$s.Rate=-3`)
-- N4 ~ N3: 보통 (macOS: `-r 160`, Windows: `$s.Rate=-1`)
-- N2 ~ N1: 자연 속도 (macOS: 기본값, Windows: `$s.Rate=0`)
+- Pre-N5 ~ N5: 느리게 (rate: 0.7)
+- N4 ~ N3: 보통 (rate: 0.9)
+- N2 ~ N1: 자연 속도 (rate: 1.0)
 
-### 주의사항
+### HTML TTS 플레이어 생성 규칙
 
-- TTS 명령은 **백그라운드로 실행** (`&` 붙이기)하여 학습 흐름을 막지 않습니다.
-- 긴 문장은 끊어서 재생합니다 (한 문장씩).
-- TTS가 실패해도 학습 진행에 영향을 주지 않도록 합니다.
+학습 세션에서 발음이 필요한 단어/문장이 있을 때:
+1. `jp-data/tts-player.html` 파일을 생성 (또는 갱신)
+2. 해당 세션의 모든 일본어 텍스트를 발음 버튼으로 나열
+3. "발음을 듣고 싶으면 `jp-data/tts-player.html`을 브라우저에서 열어주세요" 안내
+4. 기존 HTML 템플릿(flashcard, kana-chart 등)에도 Web Speech API 발음 버튼 추가 가능
 
 ## 언어 규칙
 

@@ -10,7 +10,7 @@ argument-hint: "[모드: chart|quiz|stage 또는 빈칸으로 자동 진행]"
 ## 사전 준비
 
 1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요. (특히 TTS 섹션 확인)
-2. TTS 사용 가능 여부를 확인합니다: `[[ "$(uname)" == "Darwin" ]] && say -v Kyoko "" 2>/dev/null && echo "TTS_OK"`
+2. TTS 환경을 감지합니다 (SKILL.md TTS 섹션 참조). Cowork/원격 환경이면 HTML TTS 플레이어를 생성합니다.
 3. `jp-data/progress.json`을 읽으세요.
    - 파일이 없으면: "아직 초기 설정이 되어 있지 않습니다. `/jp:start`로 시작해주세요!" 안내 후 종료.
    - level이 "Pre-N5"가 아니면: 이미 가나를 졸업한 학습자입니다. "가나 복습이 필요하시면 말씀해주세요!" 라고 안내하되, 원하면 진행합니다.
@@ -36,7 +36,7 @@ progress.json의 `kana` 필드에서 현재 상태를 확인합니다:
 1. **새 문자 소개** (3~5자)
    - 큰 글씨로 문자 표시
    - 발음 (로마자 + 한국어 유사음)
-   - **TTS로 발음 재생**: `say -v Kyoko -r 100 "あ"` (느린 속도로)
+   - **TTS로 발음 재생** (SKILL.md TTS 섹션 방식에 따라: 로컬이면 say, 원격이면 HTML TTS 플레이어 생성)
    - 획순 설명 (간단히)
    - 핵심 단어 1~2개와 함께 제시 + TTS로 단어 발음 재생
    - 비슷한 모양의 문자가 있으면 차이점 설명
@@ -123,12 +123,27 @@ progress.json의 `kana` 필드에서 현재 상태를 확인합니다:
 
 ## TTS 활용
 
-가나 학습에서 TTS는 특히 중요합니다. SKILL.md의 TTS 섹션을 따르되:
+가나 학습에서 TTS는 특히 중요합니다. SKILL.md의 TTS 섹션을 따릅니다.
 
-- **문자 소개 시**: 각 문자를 느린 속도로 재생 (`-r 100`)
-- **퀴즈 정답 시**: 정답 문자와 관련 단어를 재생
-- **단어 읽기 시**: 단어 전체를 한 번 재생
-- TTS가 불가능한 환경이면 조용히 스킵합니다.
+### 로컬 macOS 환경
+- `say -v Kyoko -r 100 "あ"` 로 직접 재생
+
+### Cowork/원격 환경 (기본)
+세션에서 배우는 모든 문자/단어를 모아 `jp-data/tts-player.html`을 생성합니다:
+1. `skills/jp/references/templates/tts-player.html` 템플릿을 읽습니다.
+2. `const DATA = null;`을 실제 데이터로 치환합니다:
+   ```json
+   {
+     "title": "가나 Stage 1 발음",
+     "rate": 0.7,
+     "words": [
+       { "jp": "あ", "reading": "a", "meaning": "아" },
+       { "jp": "あい", "reading": "ai", "meaning": "사랑" }
+     ]
+   }
+   ```
+3. `jp-data/tts-player.html`로 저장합니다.
+4. "발음을 들으려면 `jp-data/tts-player.html`을 브라우저에서 열어주세요" 안내합니다.
 
 ## 언어 규칙
 
