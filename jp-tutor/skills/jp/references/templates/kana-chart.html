@@ -301,6 +301,76 @@ h1 {
   color: var(--text-secondary);
 }
 
+/* TTS Settings */
+.tts-settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.tts-settings select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  max-width: 160px;
+}
+
+.tts-settings select:focus { border-color: var(--accent); }
+
+.tts-settings input[type="range"] {
+  width: 70px;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.tts-settings input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.tts-settings .speed-val {
+  font-weight: 600;
+  min-width: 28px;
+}
+
+.detail-speak {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.detail-speak:hover { opacity: 0.85; }
+.detail-speak.speaking { animation: pulse 1.5s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
 @media (max-width: 480px) {
   .chart-cell .kana { font-size: 1rem; }
   .chart-cell .romaji { font-size: 0.5rem; }
@@ -325,6 +395,57 @@ const DATA = null;
   }
 
   var currentTab = 'hiragana';
+
+  // TTS
+  var hasTTS = 'speechSynthesis' in window;
+  var jaVoices = [];
+  var selectedVoiceIdx = 0;
+  var ttsRate = 0.7;
+
+  function loadVoices() {
+    if (!hasTTS) return;
+    var all = speechSynthesis.getVoices();
+    jaVoices = all.filter(function(v) { return v.lang && v.lang.startsWith('ja'); });
+    if (jaVoices.length === 0) {
+      jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
+    }
+    // Re-render TTS settings only if already rendered
+    var sel = document.getElementById('voice-sel');
+    if (sel && jaVoices.length > 0) {
+      sel.innerHTML = '';
+      jaVoices.forEach(function(v, i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = v.name.replace('Google ', '').replace('Microsoft ', 'MS ');
+        if (i === selectedVoiceIdx) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
+  function speakKana(text) {
+    if (!hasTTS || !text) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = ttsRate;
+    if (jaVoices.length > 0) u.voice = jaVoices[selectedVoiceIdx];
+    var btn = document.getElementById('detail-speak-btn');
+    if (btn) btn.classList.add('speaking');
+    u.onend = function() {
+      var b = document.getElementById('detail-speak-btn');
+      if (b) b.classList.remove('speaking');
+    };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  }
+
+  if (hasTTS) {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    }
+    loadVoices();
+  }
 
   var HIRAGANA_CHART = [
     { label: '', row: ['a','i','u','e','o'], header: true },
@@ -473,6 +594,30 @@ const DATA = null;
       html += renderChart(KATAKANA_CHART, 'katakana');
     }
 
+    // TTS settings
+    if (hasTTS) {
+      html += '<div class="tts-settings">';
+      html += '<span>Voice</span>';
+      if (jaVoices.length > 1) {
+        html += '<select id="voice-sel">';
+        jaVoices.forEach(function(v, i) {
+          var label = v.name.replace('Google ', '').replace('Microsoft ', 'MS ');
+          html += '<option value="' + i + '"' + (i === selectedVoiceIdx ? ' selected' : '') + '>' + esc(label) + '</option>';
+        });
+        html += '</select>';
+      } else if (jaVoices.length === 1) {
+        html += '<span>' + esc(jaVoices[0].name.replace('Google ', '')) + '</span>';
+        html += '<select id="voice-sel" style="display:none"><option value="0"></option></select>';
+      } else {
+        html += '<span style="font-style:italic">loading...</span>';
+        html += '<select id="voice-sel" style="display:none"></select>';
+      }
+      html += '<span style="margin-left:auto">Speed</span>';
+      html += '<input type="range" id="tts-speed" min="0.3" max="1.5" step="0.1" value="' + ttsRate + '">';
+      html += '<span class="speed-val" id="tts-speed-val">' + ttsRate.toFixed(1) + 'x</span>';
+      html += '</div>';
+    }
+
     // Legend
     html += '<div class="legend" style="margin-top:12px">';
     html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-blue)"></div>마스터</div>';
@@ -515,7 +660,9 @@ const DATA = null;
       html += '<div class="detail-word">' + esc(word) + '</div>';
     }
 
-    html += '<button class="detail-close" style="background:var(--accent);color:#fff;margin-top:12px;border:none" onclick="if(window.speechSynthesis){var u=new SpeechSynthesisUtterance(\'' + kana + '\');u.lang=\'ja-JP\';u.rate=0.7;speechSynthesis.speak(u)}">발음 듣기</button>';
+    if (hasTTS) {
+      html += '<button class="detail-speak" id="detail-speak-btn" data-kana="' + esc(kana) + '">발음 듣기</button>';
+    }
     html += '<button class="detail-close" onclick="document.getElementById(\'detail\').classList.remove(\'show\')">닫기</button>';
     card.innerHTML = html;
     document.getElementById('detail').classList.add('show');
@@ -543,6 +690,21 @@ const DATA = null;
         if (e.target === overlay) overlay.classList.remove('show');
       });
     }
+
+    // TTS events
+    var voiceSel = document.getElementById('voice-sel');
+    if (voiceSel) voiceSel.addEventListener('change', function() {
+      selectedVoiceIdx = parseInt(voiceSel.value);
+    });
+    var ttsSpeed = document.getElementById('tts-speed');
+    if (ttsSpeed) ttsSpeed.addEventListener('input', function() {
+      ttsRate = parseFloat(ttsSpeed.value);
+      document.getElementById('tts-speed-val').textContent = ttsRate.toFixed(1) + 'x';
+    });
+    var speakBtn = document.getElementById('detail-speak-btn');
+    if (speakBtn) speakBtn.addEventListener('click', function() {
+      speakKana(speakBtn.dataset.kana);
+    });
   }
 
   render();
