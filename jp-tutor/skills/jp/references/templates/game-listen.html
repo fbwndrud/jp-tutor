@@ -180,29 +180,6 @@ body {
   50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(242,165,183,0.1), 0 6px 24px rgba(155,127,212,0.4); }
 }
 
-.plays-badge {
-  display: inline-block;
-  margin-top: 10px;
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--bg-sunken);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  padding: 4px 14px;
-}
-
-.row-hint {
-  margin-top: 10px;
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--accent);
-  background: var(--accent-light);
-  border-radius: var(--radius-pill);
-  padding: 6px 18px;
-}
 
 /* Canvas area */
 .canvas-section {
@@ -311,40 +288,6 @@ body {
   color: var(--text-secondary);
   margin-bottom: 10px;
 }
-.reveal-score {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  padding: 6px 20px;
-  border-radius: var(--radius-pill);
-  color: #fff;
-}
-.reveal-score.pass { background: var(--badge-green); }
-.reveal-score.fail { background: var(--badge-red); }
-
-/* Stroke animation canvas */
-.stroke-anim-wrap {
-  width: 200px;
-  height: 200px;
-  margin-top: 12px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  overflow: hidden;
-}
-
-/* Flash overlay */
-.flash-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-.flash-overlay.green { background: rgba(126,200,168,0.25); opacity: 1; }
-.flash-overlay.red { background: rgba(232,139,139,0.25); opacity: 1; }
-
 /* Result screen */
 .result-screen {
   display: none;
@@ -363,12 +306,6 @@ body {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 6px;
-}
-.result-rate {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 .result-list {
@@ -397,25 +334,6 @@ body {
   color: var(--text-secondary);
   margin-left: 8px;
 }
-.result-item .q-status {
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 3px 12px;
-  border-radius: var(--radius-pill);
-}
-.result-item .q-status.ok { background: var(--badge-green); color: #fff; }
-.result-item .q-status.ng { background: var(--badge-red); color: #fff; }
-
-/* Confetti */
-.confetti-piece {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  pointer-events: none;
-  z-index: 200;
-  animation: confettiFall 1.2s ease-out forwards;
-}
 
 /* Animations */
 @keyframes bounceIn {
@@ -423,11 +341,6 @@ body {
   60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes confettiFall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
-}
-
 body > * { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 /* === Ambient Particles & Sound Toggle === */
@@ -497,7 +410,6 @@ body > * { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 </head>
 <body>
 <div class="container" id="app"></div>
-<div class="flash-overlay" id="flash"></div>
 
 <script>
 const DATA = null;
@@ -511,14 +423,9 @@ const DATA = null;
   }
 
   var characters = DATA.characters || [];
-  var maxPlays = DATA.maxPlays || 3;
-  var showRowHint = DATA.showRowHint !== false;
-  var similarityThreshold = DATA.similarityThreshold || 60;
   var totalChars = characters.length;
   var currentIndex = 0;
-  var playsLeft = maxPlays;
-  var results = [];
-  var judged = false;
+  var revealed = false;
 
   // TTS
   var hasTTS = 'speechSynthesis' in window;
@@ -575,7 +482,7 @@ const DATA = null;
     }
   }
 
-  function speakChar(char, countAgainstLimit) {
+  function speakChar(char) {
     if (!hasTTS || !char) return;
     speechSynthesis.cancel();
     var gen = ++speakGen;
@@ -584,10 +491,6 @@ const DATA = null;
     u.rate = 0.8;
     if (jaVoices.length > 0) u.voice = jaVoices[selectedVoiceIdx];
     isSpeaking = true;
-    if (countAgainstLimit && playsLeft > 0) {
-      playsLeft--;
-      updatePlaysUI();
-    }
     var btn = document.getElementById('btn-speak');
     if (btn) btn.classList.add('speaking');
     u.onend = function() {
@@ -607,16 +510,6 @@ const DATA = null;
     loadVoices();
   }
 
-  function updatePlaysUI() {
-    var badge = document.getElementById('plays-badge');
-    if (badge) badge.textContent = '\uB0A8\uC740 \uC7AC\uC0DD: ' + playsLeft;
-    var btn = document.getElementById('btn-speak');
-    if (btn) {
-      if (playsLeft <= 0) {
-        btn.disabled = true;
-      }
-    }
-  }
 
   // --- Canvas Drawing ---
   function initCanvas() {
@@ -645,7 +538,6 @@ const DATA = null;
   }
 
   function onPointerDown(e) {
-    if (judged) return;
     e.preventDefault();
     drawCanvas.setPointerCapture(e.pointerId);
     isDrawing = true;
@@ -658,7 +550,7 @@ const DATA = null;
   }
 
   function onPointerMove(e) {
-    if (!isDrawing || judged) return;
+    if (!isDrawing) return;
     e.preventDefault();
     var pos = getCanvasPos(e);
     drawCtx.quadraticCurveTo(lastX, lastY, (lastX + pos.x) / 2, (lastY + pos.y) / 2);
@@ -681,162 +573,10 @@ const DATA = null;
     hasDrawn = false;
   }
 
-  // --- Similarity Check ---
-  function renderAnswerToCanvas(char) {
-    var offscreen = document.createElement('canvas');
-    offscreen.width = 300;
-    offscreen.height = 300;
-    var ctx = offscreen.getContext('2d');
-
-    // Draw strokes if available
-    var strokes = char.strokes;
-    if (strokes && strokes.length > 0) {
-      ctx.lineWidth = 6;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = '#000';
-      for (var s = 0; s < strokes.length; s++) {
-        var pts = strokes[s];
-        if (pts.length < 2) continue;
-        ctx.beginPath();
-        ctx.moveTo(pts[0][0], pts[0][1]);
-        for (var p = 1; p < pts.length; p++) {
-          if (p < pts.length - 1) {
-            var midX = (pts[p][0] + pts[p + 1][0]) / 2;
-            var midY = (pts[p][1] + pts[p + 1][1]) / 2;
-            ctx.quadraticCurveTo(pts[p][0], pts[p][1], midX, midY);
-          } else {
-            ctx.lineTo(pts[p][0], pts[p][1]);
-          }
-        }
-        ctx.stroke();
-      }
-    } else {
-      // Fallback: draw the character as text
-      ctx.font = '200px "Zen Maru Gothic", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#000';
-      ctx.fillText(char.char, 150, 160);
-    }
-    return offscreen;
-  }
-
-  function computeSimilarity(char) {
-    var answerCanvas = renderAnswerToCanvas(char);
-    var ansCtx = answerCanvas.getContext('2d');
-    var ansData = ansCtx.getImageData(0, 0, 300, 300).data;
-    var userData = drawCtx.getImageData(0, 0, 300, 300).data;
-
-    var ansPixels = 0;
-    var userPixels = 0;
-    var overlap = 0;
-
-    for (var i = 3; i < ansData.length; i += 4) {
-      var aA = ansData[i] > 30;
-      var uA = userData[i] > 30;
-      if (aA) ansPixels++;
-      if (uA) userPixels++;
-      if (aA && uA) overlap++;
-    }
-
-    if (ansPixels === 0 && userPixels === 0) return 100;
-    if (ansPixels === 0 || userPixels === 0) return 0;
-
-    // Weighted overlap: considers both precision and recall
-    var recall = overlap / ansPixels;
-    var precision = overlap / userPixels;
-    if (precision + recall === 0) return 0;
-    var f1 = 2 * (precision * recall) / (precision + recall);
-    return Math.round(f1 * 100);
-  }
-
-  // --- Stroke animation ---
-  function animateStrokes(canvasEl, char) {
-    var ctx = canvasEl.getContext('2d');
-    var w = canvasEl.width;
-    var h = canvasEl.height;
-    var strokes = char.strokes;
-    ctx.clearRect(0, 0, w, h);
-
-    if (!strokes || strokes.length === 0) {
-      // Just show the character
-      ctx.font = '140px "Zen Maru Gothic", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#9B7FD4';
-      ctx.fillText(char.char, w / 2, h / 2 + 10);
-      return;
-    }
-
-    var scaleX = w / 300;
-    var scaleY = h / 300;
-    var strokeIdx = 0;
-    var ptIdx = 0;
-    var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#9B7FD4';
-
-    function drawNext() {
-      if (strokeIdx >= strokes.length) return;
-      var pts = strokes[strokeIdx];
-      if (pts.length < 2) { strokeIdx++; ptIdx = 0; drawNext(); return; }
-
-      ctx.lineWidth = 4 * scaleX;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = accentColor;
-      ctx.beginPath();
-      ctx.moveTo(pts[ptIdx][0] * scaleX, pts[ptIdx][1] * scaleY);
-
-      ptIdx++;
-      if (ptIdx < pts.length) {
-        ctx.lineTo(pts[ptIdx][0] * scaleX, pts[ptIdx][1] * scaleY);
-        ctx.stroke();
-        setTimeout(drawNext, 60);
-      } else {
-        ctx.stroke();
-        strokeIdx++;
-        ptIdx = 0;
-        setTimeout(drawNext, 300);
-      }
-    }
-
-    drawNext();
-  }
-
-  // --- Flash effect ---
-  function flashScreen(color) {
-    var el = document.getElementById('flash');
-    el.className = 'flash-overlay ' + color;
-    setTimeout(function() {
-      el.className = 'flash-overlay';
-    }, 400);
-  }
-
-  // --- Confetti ---
-  function spawnConfetti() {
-    var colors = ['#9B7FD4', '#F2A5B7', '#7EC8A8', '#F4B183', '#E88B8B'];
-    for (var i = 0; i < 30; i++) {
-      var piece = document.createElement('div');
-      piece.className = 'confetti-piece';
-      piece.style.left = (Math.random() * 100) + 'vw';
-      piece.style.top = '-10px';
-      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-      piece.style.width = (6 + Math.random() * 8) + 'px';
-      piece.style.height = (6 + Math.random() * 8) + 'px';
-      piece.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
-      piece.style.animationDelay = (Math.random() * 0.4) + 's';
-      document.body.appendChild(piece);
-      setTimeout(function(el) {
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }.bind(null, piece), 2000);
-    }
-  }
-
   // --- Render ---
   function renderRound() {
-    judged = false;
+    revealed = false;
     hasDrawn = false;
-    playsLeft = maxPlays;
     var char = characters[currentIndex];
     var pct = ((currentIndex + 1) / totalChars * 100).toFixed(1);
 
@@ -853,10 +593,6 @@ const DATA = null;
     // TTS section
     html += '<div class="tts-section">';
     html += '<button class="btn-speak" id="btn-speak" aria-label="\uBC1C\uC74C \uB4E3\uAE30">\uD83D\uDD0A</button>';
-    html += '<div class="plays-badge" id="plays-badge">\uB0A8\uC740 \uC7AC\uC0DD: ' + playsLeft + '</div>';
-    if (showRowHint && char.row_hint) {
-      html += '<div class="row-hint">' + esc(char.row_hint) + '\uC774\uC5D0\uC694</div>';
-    }
     html += '</div>';
 
     // Canvas
@@ -864,7 +600,8 @@ const DATA = null;
     html += '<div class="canvas-wrap"><canvas id="draw-canvas" width="300" height="300"></canvas><div class="canvas-grid"></div></div>';
     html += '<div class="btn-row">';
     html += '<button class="btn btn-secondary" id="clearBtn">\uB2E4\uC2DC \uC4F0\uAE30</button>';
-    html += '<button class="btn btn-primary" id="judgeBtn">\uD310\uC815\uD558\uAE30</button>';
+    html += '<button class="btn btn-secondary" id="revealBtn">\uC815\uB2F5 \uBCF4\uAE30</button>';
+    html += '<button class="btn btn-primary" id="nextBtn">\uB2E4\uC74C</button>';
     html += '</div>';
     html += '</div>';
 
@@ -872,11 +609,6 @@ const DATA = null;
     html += '<div class="reveal-section" id="reveal">';
     html += '<div class="reveal-char" id="reveal-char"></div>';
     html += '<div class="reveal-reading" id="reveal-reading"></div>';
-    html += '<div class="reveal-score" id="reveal-score"></div>';
-    html += '<div class="stroke-anim-wrap"><canvas id="stroke-anim" width="200" height="200"></canvas></div>';
-    html += '<div class="btn-row" style="margin-top:16px">';
-    html += '<button class="btn btn-primary" id="nextBtn">\uB2E4\uC74C \u2192</button>';
-    html += '</div>';
     html += '</div>';
 
     // Counter
@@ -893,28 +625,22 @@ const DATA = null;
     var speakBtn = document.getElementById('btn-speak');
     if (speakBtn) {
       speakBtn.addEventListener('click', function() {
-        if (playsLeft <= 0 && !judged) return;
         var char = characters[currentIndex];
-        if (judged) {
-          speakChar(char.char, false);
-        } else {
-          speakChar(char.char, true);
-        }
+        speakChar(char.char);
       });
     }
 
     var clearBtn = document.getElementById('clearBtn');
     if (clearBtn) {
       clearBtn.addEventListener('click', function() {
-        if (!judged) clearCanvas();
+        clearCanvas();
       });
     }
 
-    var judgeBtn = document.getElementById('judgeBtn');
-    if (judgeBtn) {
-      judgeBtn.addEventListener('click', function() {
-        if (judged || !hasDrawn) return;
-        doJudge();
+    var revealBtn = document.getElementById('revealBtn');
+    if (revealBtn) {
+      revealBtn.addEventListener('click', function() {
+        if (!revealed) doReveal();
       });
     }
 
@@ -931,62 +657,25 @@ const DATA = null;
     }
   }
 
-  function doJudge() {
-    judged = true;
+  function doReveal() {
+    revealed = true;
     var char = characters[currentIndex];
-    var score = computeSimilarity(char);
-    var passed = score >= similarityThreshold;
 
-    results.push({ char: char.char, reading: char.reading, score: score, passed: passed });
-
-    // Flash
-    flashScreen(passed ? 'green' : 'red');
-    if (passed) spawnConfetti();
-
-    // Show reveal
     var reveal = document.getElementById('reveal');
     var revealChar = document.getElementById('reveal-char');
     var revealReading = document.getElementById('reveal-reading');
-    var revealScore = document.getElementById('reveal-score');
 
     revealChar.textContent = char.char;
     revealReading.textContent = char.reading;
-    revealScore.textContent = (passed ? '\uD569\uACA9' : '\uBD88\uD569\uACA9') + ' ' + score + '%';
-    revealScore.className = 'reveal-score ' + (passed ? 'pass' : 'fail');
     reveal.classList.add('visible');
 
-    // Animate strokes
-    var animCanvas = document.getElementById('stroke-anim');
-    if (animCanvas) {
-      animateStrokes(animCanvas, char);
-    }
-
-    // Play TTS one more time (does not count)
-    speakChar(char.char, false);
-
-    // Disable drawing controls
-    var clearBtn = document.getElementById('clearBtn');
-    if (clearBtn) clearBtn.disabled = true;
-    var judgeBtn = document.getElementById('judgeBtn');
-    if (judgeBtn) judgeBtn.disabled = true;
+    speakChar(char.char);
   }
 
   function showResults() {
-    var passedCount = results.filter(function(r) { return r.passed; }).length;
-    var rate = Math.round((passedCount / totalChars) * 100);
-
-    var listHTML = results.map(function(r) {
-      var status = r.passed
-        ? '<span class="q-status ok">\uD569\uACA9 ' + r.score + '%</span>'
-        : '<span class="q-status ng">\uBD88\uD569\uACA9 ' + r.score + '%</span>';
-      return '<li class="result-item"><span><span class="q-char">' + esc(r.char) + '</span><span class="q-reading">' + esc(r.reading) + '</span></span>' + status + '</li>';
-    }).join('');
-
     app.innerHTML = '<div class="result-screen visible">' +
-      '<div class="result-header">\uACB0\uACFC</div>' +
-      '<div class="result-score-main">' + passedCount + ' / ' + totalChars + ' \uD569\uACA9</div>' +
-      '<div class="result-rate">\uD569\uACA9\uB960 ' + rate + '%</div>' +
-      '<ul class="result-list">' + listHTML + '</ul>' +
+      '<div class="result-header">\uC5F0\uC2B5 \uC644\uB8CC!</div>' +
+      '<div class="result-score-main">\uCD1D ' + totalChars + '\uC790 \uC5F0\uC2B5 \uC644\uB8CC</div>' +
       '<div class="btn-row">' +
         '<button class="btn btn-primary" id="retryBtn">\uB2E4\uC2DC \uD558\uAE30</button>' +
       '</div>' +
@@ -994,7 +683,6 @@ const DATA = null;
 
     document.getElementById('retryBtn').addEventListener('click', function() {
       currentIndex = 0;
-      results = [];
       renderRound();
     });
   }

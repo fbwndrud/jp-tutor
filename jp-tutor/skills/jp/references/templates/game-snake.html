@@ -249,24 +249,26 @@ body {
 
 .svg-overlay line.matched-line {
   stroke: var(--mint);
-  stroke-width: 3;
+  stroke-width: 5;
   stroke-linecap: round;
-  opacity: 0.7;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px var(--mint));
 }
 
 .svg-overlay line.preview-line {
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-dasharray: 6 4;
   stroke-linecap: round;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 .svg-overlay line.fail-line {
   stroke: var(--coral);
-  stroke-width: 3;
+  stroke-width: 5;
   stroke-linecap: round;
-  opacity: 0.7;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 6px var(--coral));
   animation: lineFade 0.5s ease forwards;
 }
 
