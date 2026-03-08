@@ -3,58 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
 <title>TTS Player</title>
 <style>
 :root {
-  --bg: #F7F6F3;
-  --bg-card: #FFFFFF;
-  --text: #1C1C1E;
-  --text-secondary: #6C6C70;
-  --text-muted: #AEAEB2;
-  --border: #E5E5EA;
-  --accent: #4A90D9;
-  --accent-hover: #3A7BC8;
-  --accent-light: #EBF3FC;
-  --green: #27AE60;
-  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-lg: 0 4px 8px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.1);
-  --radius: 14px;
-  --radius-sm: 10px;
+  --bg: #F5F0E8;
+  --bg-elevated: #FFFDF8;
+  --bg-sunken: #EDE8DE;
+  --text: #2C2C2C;
+  --text-secondary: #6B6560;
+  --text-muted: #A09890;
+  --border: #DDD6CB;
+  --accent: #3D5A80;
+  --accent-hover: #2C4A6E;
+  --accent-light: #E8EEF4;
+  --vermillion: #C1440E;
+  --ink: #2C2C2C;
+  --paper: #F5F0E8;
+  --shadow-sm: 0 1px 2px rgba(44,44,44,0.06);
+  --shadow: 0 2px 8px rgba(44,44,44,0.08), 0 1px 2px rgba(44,44,44,0.04);
+  --shadow-lg: 0 8px 24px rgba(44,44,44,0.1), 0 2px 8px rgba(44,44,44,0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-display: 'Shippori Mincho', serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0F0F1A;
-    --bg-card: #1A1A2E;
-    --text: #E8E6E1;
-    --text-secondary: #9CA3AF;
-    --text-muted: #6B7280;
-    --border: #2A2A3E;
-    --accent-light: #1A2540;
-    --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.2);
-    --shadow-lg: 0 4px 8px rgba(0,0,0,0.2), 0 12px 28px rgba(0,0,0,0.3);
+    --bg: #1A1A24;
+    --bg-elevated: #24243A;
+    --bg-sunken: #14141E;
+    --text: #E8E4DC;
+    --text-secondary: #A09890;
+    --text-muted: #6B6560;
+    --border: #33334A;
+    --accent: #7BA3CC;
+    --accent-hover: #90B8E0;
+    --accent-light: #252540;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow: 0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
   }
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
+  background-image: var(--grain);
   color: var(--text);
   line-height: 1.6;
-  padding: 16px;
+  padding: 20px 16px;
+  min-height: 100vh;
 }
 
 .container { max-width: 480px; margin: 0 auto; }
 
-/* Now Playing */
+/* — Now Playing Card — */
 .now-playing {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  padding: 32px 24px 24px;
+  padding: 36px 28px 28px;
   text-align: center;
   margin-bottom: 16px;
   border: 1px solid var(--border);
@@ -67,124 +80,153 @@ body {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--accent), var(--vermillion));
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.4s ease;
 }
 
 .now-playing.active::before { opacity: 1; }
 
+/* Decorative corner marks — like a stamp registration mark */
+.now-playing::after {
+  content: '◆';
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 0.6rem;
+  color: var(--vermillion);
+  opacity: 0.4;
+}
+
 .np-label {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 3px;
   color: var(--text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .np-japanese {
-  font-size: 2.8rem;
+  font-family: var(--font-display);
+  font-size: 3rem;
   font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 4px;
-  transition: color 0.3s;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
 }
 
 .now-playing.active .np-japanese { color: var(--accent); }
 
 .np-reading {
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
   color: var(--text-secondary);
   margin-bottom: 2px;
+  letter-spacing: 0.5px;
 }
 
 .np-meaning {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  font-weight: 300;
 }
 
-/* Playback Controls */
+/* Controls */
 .controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .btn-ctrl {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  background: var(--bg-elevated);
   color: var(--text);
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
 }
 
-.btn-ctrl:hover { background: var(--border); }
+.btn-ctrl:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.05);
+}
 
 .btn-play {
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   background: var(--accent);
   color: #fff;
   border: none;
   font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(61,90,128,0.3);
 }
 
-.btn-play:hover { background: var(--accent-hover); }
+.btn-play:hover {
+  background: var(--accent-hover);
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(61,90,128,0.35);
+}
 
 .np-counter {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 8px;
+  letter-spacing: 1px;
 }
 
-/* Settings */
+/* — Settings Panel — */
 .settings {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 16px;
+  padding: 18px 20px;
   margin-bottom: 16px;
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .setting-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .setting-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
-  min-width: 36px;
+  min-width: 40px;
+  letter-spacing: 0.5px;
 }
 
 .voice-select {
   flex: 1;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text);
-  font-size: 0.85rem;
-  font-family: inherit;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
   outline: none;
   cursor: pointer;
+  transition: border-color 0.2s;
 }
 
 .voice-select:focus { border-color: var(--accent); }
@@ -205,14 +247,19 @@ body {
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(61,90,128,0.25);
+  transition: transform 0.15s;
 }
+
+.speed-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
 
 .speed-val {
   font-size: 0.8rem;
   font-weight: 600;
-  min-width: 32px;
+  min-width: 34px;
   text-align: right;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .toggle-row {
@@ -222,29 +269,35 @@ body {
 
 .btn-toggle {
   flex: 1;
-  padding: 8px;
-  border: 1px solid var(--border);
+  padding: 9px;
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  font-family: inherit;
+  font-family: var(--font-body);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
+  letter-spacing: 0.3px;
 }
 
-.btn-toggle:hover { background: var(--border); }
-.btn-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.btn-toggle.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(61,90,128,0.2);
+}
 
-/* Playlist */
+/* — Playlist — */
 .playlist-header {
-  font-size: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding-left: 2px;
 }
 
 .playlist {
@@ -256,27 +309,33 @@ body {
 .pl-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
-.pl-item:hover { border-color: var(--accent); }
+.pl-item:hover {
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
 
 .pl-item.active {
   border-color: var(--accent);
   background: var(--accent-light);
+  box-shadow: var(--shadow-sm);
 }
 
 .pl-num {
-  font-size: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-muted);
-  min-width: 18px;
+  min-width: 20px;
+  text-align: center;
 }
 
 .pl-item.active .pl-num { color: var(--accent); }
@@ -284,27 +343,30 @@ body {
 .pl-text { flex: 1; min-width: 0; }
 
 .pl-jp {
+  font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 600;
 }
 
 .pl-sub {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
+  font-weight: 300;
+  margin-top: 1px;
 }
 
 .pl-icon {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--border);
+  background: var(--bg-sunken);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
-  color: var(--text-secondary);
+  font-size: 0.6rem;
+  color: var(--text-muted);
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all 0.25s ease;
 }
 
 .pl-item.active .pl-icon {
@@ -312,27 +374,34 @@ body {
   color: #fff;
 }
 
+/* Animations */
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.06); }
+  50% { transform: scale(1.05); }
 }
 
 .now-playing.active .btn-play {
-  animation: pulse 1.5s ease-in-out infinite;
+  animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.container > * { animation: fadeIn 0.3s ease-out; }
+.container > * {
+  animation: slideUp 0.4s ease-out both;
+}
+.container > *:nth-child(2) { animation-delay: 0.06s; }
+.container > *:nth-child(3) { animation-delay: 0.12s; }
+.container > *:nth-child(4) { animation-delay: 0.18s; }
 
 .empty-state {
   text-align: center;
-  padding: 48px 20px;
+  padding: 56px 20px;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
 }
 
 .voice-info {
@@ -342,7 +411,8 @@ body {
 }
 
 @media (max-width: 480px) {
-  .np-japanese { font-size: 2.2rem; }
+  .np-japanese { font-size: 2.4rem; }
+  .now-playing { padding: 28px 20px 22px; }
 }
 </style>
 </head>
@@ -380,7 +450,21 @@ const DATA = null;
     if (jaVoices.length === 0) {
       jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
     }
-    render();
+    var sel = document.getElementById('voice-sel');
+    if (sel && jaVoices.length > 0) {
+      sel.innerHTML = '';
+      jaVoices.forEach(function(v, i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = v.name.replace('Google ', '').replace('Microsoft ', 'MS ') + (v.localService ? ' (local)' : '');
+        if (i === selectedVoiceIdx) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+    var info = document.getElementById('voice-info');
+    if (info && jaVoices.length === 1) {
+      info.textContent = jaVoices[0].name;
+    }
   }
 
   function esc(s) {
@@ -403,16 +487,16 @@ const DATA = null;
     if (v) u.voice = v;
 
     isPlaying = true;
-    render();
+    updateUI();
 
     u.onend = function() {
       isPlaying = false;
-      render();
+      updateUI();
       if (onEnd) onEnd();
     };
     u.onerror = function() {
       isPlaying = false;
-      render();
+      updateUI();
       if (onEnd) onEnd();
     };
     speechSynthesis.speak(u);
@@ -431,20 +515,23 @@ const DATA = null;
   function playNext() {
     if (currentIdx < DATA.words.length - 1) {
       currentIdx++;
+      updateUI();
       playCurrent();
     } else if (isLooping) {
       currentIdx = 0;
+      updateUI();
       playCurrent();
     } else {
       isAutoPlaying = false;
       isPlaying = false;
-      render();
+      updateUI();
     }
   }
 
   function playPrev() {
     if (currentIdx > 0) {
       currentIdx--;
+      updateUI();
       playCurrent();
     }
   }
@@ -454,9 +541,10 @@ const DATA = null;
       isAutoPlaying = false;
       speechSynthesis.cancel();
       isPlaying = false;
-      render();
+      updateUI();
     } else {
       isAutoPlaying = true;
+      updateUI();
       playCurrent();
     }
   }
@@ -466,7 +554,7 @@ const DATA = null;
       speechSynthesis.cancel();
       isPlaying = false;
       isAutoPlaying = false;
-      render();
+      updateUI();
     } else {
       playCurrent();
     }
@@ -475,35 +563,81 @@ const DATA = null;
   function selectWord(idx) {
     isAutoPlaying = false;
     currentIdx = idx;
+    updateUI();
     playCurrent();
+  }
+
+  function updateUI() {
+    var w = DATA.words[currentIdx];
+
+    var np = document.querySelector('.now-playing');
+    if (np) np.classList.toggle('active', isPlaying);
+
+    var jpEl = document.querySelector('.np-japanese');
+    if (jpEl) jpEl.textContent = w.jp;
+
+    var rdEl = document.querySelector('.np-reading');
+    if (rdEl) {
+      rdEl.textContent = w.reading || '';
+      rdEl.style.display = w.reading ? '' : 'none';
+    }
+
+    var mnEl = document.querySelector('.np-meaning');
+    if (mnEl) {
+      mnEl.textContent = w.meaning || '';
+      mnEl.style.display = w.meaning ? '' : 'none';
+    }
+
+    var playBtn = document.getElementById('btn-play');
+    if (playBtn) {
+      playBtn.innerHTML = isPlaying ? '\u23F8' : '\u25B6';
+      playBtn.title = isPlaying ? 'Stop' : 'Play';
+    }
+
+    var counter = document.querySelector('.np-counter');
+    if (counter) counter.textContent = (currentIdx + 1) + ' / ' + DATA.words.length;
+
+    var autoBtn = document.getElementById('btn-autoplay');
+    if (autoBtn) {
+      autoBtn.classList.toggle('active', isAutoPlaying);
+      autoBtn.textContent = isAutoPlaying ? '\u23F9 Stop' : '\u25B6 Play All';
+    }
+
+    var loopBtn = document.getElementById('btn-loop');
+    if (loopBtn) loopBtn.classList.toggle('active', isLooping);
+
+    document.querySelectorAll('.pl-item').forEach(function(el) {
+      var i = parseInt(el.dataset.idx);
+      var active = i === currentIdx;
+      el.classList.toggle('active', active);
+      var icon = el.querySelector('.pl-icon');
+      if (icon) icon.textContent = (active && isPlaying) ? '\u23F8' : '\u25B6';
+    });
   }
 
   function render() {
     var w = DATA.words[currentIdx];
     var html = '';
 
-    // Now Playing
-    html += '<div class="now-playing' + (isPlaying ? ' active' : '') + '">';
+    html += '<div class="now-playing">';
     html += '<div class="np-label">Now Playing</div>';
     html += '<div class="np-japanese">' + esc(w.jp) + '</div>';
-    if (w.reading) html += '<div class="np-reading">' + esc(w.reading) + '</div>';
-    if (w.meaning) html += '<div class="np-meaning">' + esc(w.meaning) + '</div>';
+    html += '<div class="np-reading"' + (w.reading ? '' : ' style="display:none"') + '>' + esc(w.reading) + '</div>';
+    html += '<div class="np-meaning"' + (w.meaning ? '' : ' style="display:none"') + '>' + esc(w.meaning) + '</div>';
 
     html += '<div class="controls">';
     html += '<button class="btn-ctrl" id="btn-prev" title="Previous">\u23EE</button>';
-    html += '<button class="btn-ctrl btn-play" id="btn-play" title="' + (isPlaying ? 'Stop' : 'Play') + '">' + (isPlaying ? '\u23F8' : '\u25B6') + '</button>';
+    html += '<button class="btn-ctrl btn-play" id="btn-play" title="Play">\u25B6</button>';
     html += '<button class="btn-ctrl" id="btn-next" title="Next">\u23ED</button>';
     html += '</div>';
     html += '<div class="np-counter">' + (currentIdx + 1) + ' / ' + DATA.words.length + '</div>';
     html += '</div>';
 
-    // Settings
     html += '<div class="settings">';
 
-    // Voice selector
+    html += '<div class="setting-row">';
+    html += '<span class="setting-label">Voice</span>';
     if (jaVoices.length > 1) {
-      html += '<div class="setting-row">';
-      html += '<span class="setting-label">Voice</span>';
       html += '<select class="voice-select" id="voice-sel">';
       jaVoices.forEach(function(v, i) {
         var label = v.name.replace('Google ', '').replace('Microsoft ', 'MS ');
@@ -511,39 +645,31 @@ const DATA = null;
         html += '<option value="' + i + '"' + (i === selectedVoiceIdx ? ' selected' : '') + '>' + esc(label) + '</option>';
       });
       html += '</select>';
-      html += '</div>';
     } else if (jaVoices.length === 1) {
-      html += '<div class="setting-row">';
-      html += '<span class="setting-label">Voice</span>';
-      html += '<span class="voice-info">' + esc(jaVoices[0].name) + '</span>';
-      html += '</div>';
+      html += '<span class="voice-info" id="voice-info">' + esc(jaVoices[0].name) + '</span>';
+      html += '<select class="voice-select" id="voice-sel" style="display:none"><option value="0"></option></select>';
     } else {
-      html += '<div class="setting-row">';
-      html += '<span class="setting-label">Voice</span>';
-      html += '<span class="voice-info">Loading voices...</span>';
-      html += '</div>';
+      html += '<span class="voice-info" id="voice-info">Loading...</span>';
+      html += '<select class="voice-select" id="voice-sel" style="display:none"></select>';
     }
+    html += '</div>';
 
-    // Speed
     html += '<div class="setting-row">';
     html += '<span class="setting-label">Speed</span>';
-    html += '<input type="range" class="speed-slider" id="speed" min="0.3" max="1.5" step="0.1" value="' + rate + '">';
+    html += '<input type="range" class="speed-slider" id="speed" min="0.3" max="2.0" step="0.1" value="' + rate + '">';
     html += '<span class="speed-val" id="speed-val">' + rate.toFixed(1) + 'x</span>';
     html += '</div>';
 
-    // Toggles
     html += '<div class="toggle-row">';
-    html += '<button class="btn-toggle' + (isAutoPlaying ? ' active' : '') + '" id="btn-autoplay">' + (isAutoPlaying ? '\u23F9 Stop' : '\u25B6 Play All') + '</button>';
-    html += '<button class="btn-toggle' + (isLooping ? ' active' : '') + '" id="btn-loop">\u{1F501} Loop</button>';
+    html += '<button class="btn-toggle" id="btn-autoplay">\u25B6 Play All</button>';
+    html += '<button class="btn-toggle" id="btn-loop">\u{1F501} Loop</button>';
     html += '</div>';
     html += '</div>';
 
-    // Playlist
     html += '<div class="playlist-header">Playlist (' + DATA.words.length + ')</div>';
     html += '<div class="playlist">';
     DATA.words.forEach(function(w, i) {
-      var active = i === currentIdx;
-      html += '<div class="pl-item' + (active ? ' active' : '') + '" data-idx="' + i + '">';
+      html += '<div class="pl-item" data-idx="' + i + '">';
       html += '<span class="pl-num">' + (i + 1) + '</span>';
       html += '<div class="pl-text">';
       html += '<div class="pl-jp">' + esc(w.jp) + '</div>';
@@ -552,7 +678,7 @@ const DATA = null;
       if (w.meaning) sub.push(w.meaning);
       if (sub.length) html += '<div class="pl-sub">' + esc(sub.join(' \u00B7 ')) + '</div>';
       html += '</div>';
-      html += '<div class="pl-icon">' + (active && isPlaying ? '\u23F8' : '\u25B6') + '</div>';
+      html += '<div class="pl-icon">\u25B6</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -562,42 +688,36 @@ const DATA = null;
   }
 
   function bindEvents() {
-    var btnPlay = document.getElementById('btn-play');
-    if (btnPlay) btnPlay.addEventListener('click', togglePlay);
+    document.getElementById('btn-play').addEventListener('click', togglePlay);
 
-    var btnPrev = document.getElementById('btn-prev');
-    if (btnPrev) btnPrev.addEventListener('click', function() {
+    document.getElementById('btn-prev').addEventListener('click', function() {
       isAutoPlaying = false;
       playPrev();
     });
 
-    var btnNext = document.getElementById('btn-next');
-    if (btnNext) btnNext.addEventListener('click', function() {
+    document.getElementById('btn-next').addEventListener('click', function() {
       isAutoPlaying = false;
       if (currentIdx < DATA.words.length - 1) {
         currentIdx++;
+        updateUI();
         playCurrent();
       }
     });
 
-    var voiceSel = document.getElementById('voice-sel');
-    if (voiceSel) voiceSel.addEventListener('change', function() {
-      selectedVoiceIdx = parseInt(voiceSel.value);
+    document.getElementById('voice-sel').addEventListener('change', function() {
+      selectedVoiceIdx = parseInt(this.value);
     });
 
-    var speedSlider = document.getElementById('speed');
-    if (speedSlider) speedSlider.addEventListener('input', function() {
-      rate = parseFloat(speedSlider.value);
+    document.getElementById('speed').addEventListener('input', function() {
+      rate = parseFloat(this.value);
       document.getElementById('speed-val').textContent = rate.toFixed(1) + 'x';
     });
 
-    var btnAutoplay = document.getElementById('btn-autoplay');
-    if (btnAutoplay) btnAutoplay.addEventListener('click', toggleAutoPlay);
+    document.getElementById('btn-autoplay').addEventListener('click', toggleAutoPlay);
 
-    var btnLoop = document.getElementById('btn-loop');
-    if (btnLoop) btnLoop.addEventListener('click', function() {
+    document.getElementById('btn-loop').addEventListener('click', function() {
       isLooping = !isLooping;
-      render();
+      updateUI();
     });
 
     document.querySelectorAll('.pl-item').forEach(function(el) {
@@ -607,22 +727,22 @@ const DATA = null;
     });
   }
 
-  // Load voices (async in some browsers)
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.addEventListener('voiceschanged', loadVoices);
   }
   loadVoices();
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', function(e) {
     if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
     if (e.key === ' ') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'ArrowLeft') { isAutoPlaying = false; playPrev(); }
     else if (e.key === 'ArrowRight') {
       isAutoPlaying = false;
-      if (currentIdx < DATA.words.length - 1) { currentIdx++; playCurrent(); }
+      if (currentIdx < DATA.words.length - 1) { currentIdx++; updateUI(); playCurrent(); }
     }
   });
+
+  render();
 })();
 </script>
 </body>

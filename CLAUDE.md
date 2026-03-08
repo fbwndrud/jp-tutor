@@ -35,8 +35,12 @@
 
 ### 5. HTML 템플릿 간 디자인 토큰 통일
 - CSS 변수 (--bg, --radius, --shadow 등)는 4개 템플릿 모두 동일하게 유지
-- 폰트: `'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
-- Google Fonts CDN link 포함: `Noto+Sans+JP:wght@400;600;700`
+- 디자인 테마: "Wabi-Sabi Digital" — 일본 잉크 & 종이 미학
+- Display 폰트: `'Shippori Mincho', serif` (일본어 제목/카나 표시용)
+- Body 폰트: `'Noto Sans JP', sans-serif`
+- Google Fonts CDN: `Shippori+Mincho:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700`
+- 핵심 색상: paper `#F5F0E8`, ink `#2C2C2C`, accent `#3D5A80`, vermillion `#C1440E`
+- 배경 텍스처: SVG fractal noise grain overlay (--grain 변수)
 - 새 템플릿 추가 시 기존 디자인 토큰 복사해서 시작
 
 ## 프로젝트 구조
