@@ -295,6 +295,17 @@ function speak(text) {
 - **비즈니스 커리큘럼**: `skills/jp/references/curricula/business-japanese.md`
 - **게임 추천 시**: `skills/jp/references/game-recommendation.md` 를 읽고 추천 알고리즘을 따릅니다.
 - **게임 규칙 참조 시**: `skills/jp/references/minigame-rules.md` 를 읽고 난이도/XP를 적용합니다.
+- **게임 HTML 생성 시**: 아래 매핑 테이블에서 해당 게임 템플릿을 **반드시 먼저 읽고**, `const DATA = null;`을 실제 데이터로 치환하여 `jp-data/` 에 저장합니다. 템플릿을 읽지 않고 직접 작성하면 디자인 토큰·배경·구조가 누락됩니다.
+
+  | 게임 유형 | 템플릿 파일 |
+  |-----------|-------------|
+  | 매칭 카드 | `skills/jp/references/templates/game-match.html` |
+  | 셔플 퍼즐 | `skills/jp/references/templates/game-shuffle.html` |
+  | 스네이크 | `skills/jp/references/templates/game-snake.html` |
+  | 획순 연습 | `skills/jp/references/templates/game-stroke.html` |
+  | 듣기 퀴즈 | `skills/jp/references/templates/game-listen.html` |
+  | 부수 조합 | `skills/jp/references/templates/game-radical.html` |
+  | 조사 채우기 | `skills/jp/references/templates/game-particle.html` |
 
 ## 게이미피케이션 시스템
 
