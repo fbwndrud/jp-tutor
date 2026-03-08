@@ -406,6 +406,7 @@ body {
 .result-pair-item .icon { font-size: 1rem; }
 .result-pair-item .pair-text { color: var(--text); }
 .result-pair-item .pair-text span { color: var(--text-muted); margin: 0 4px; }
+.result-pair-item .pair-hint { color: var(--accent); font-size: 0.8rem; margin-left: auto; opacity: 0.8; }
 
 .btn {
   display: inline-flex;
@@ -803,9 +804,11 @@ const DATA = null;
 
     const pairResults = pairs.map((p, i) => {
       const ok = matchedPairs.has(i);
+      const hint = p.hint ? `<span class="pair-hint">(${p.hint})</span>` : '';
       return `<div class="result-pair-item">
         <span class="icon">${ok ? '✅' : '❌'}</span>
         <span class="pair-text">${p.a}<span>→</span>${p.b}</span>
+        ${hint}
       </div>`;
     }).join('');
 

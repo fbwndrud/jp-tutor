@@ -502,7 +502,10 @@ const DATA = null;
     return;
   }
 
-  var problems = DATA.problems || [];
+  var problems = (DATA.problems || []).map(function(p) {
+    if (!p.translation && p.meaning) p.translation = p.meaning;
+    return p;
+  });
   var previewTime = DATA.previewTime || 5;
   var timeLimit = DATA.timeLimit || 30;
   var hintCount = DATA.hintCount || 0;

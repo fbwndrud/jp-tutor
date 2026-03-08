@@ -621,7 +621,10 @@ const DATA = null;
     return;
   }
 
-  var problems = DATA.problems || [];
+  var problems = (DATA.problems || []).map(function(p) {
+    if (!p.answer && p.kanji) p.answer = p.kanji;
+    return p;
+  });
   var showPreviewFlag = DATA.showPreview !== false;
   var previewTime = DATA.previewTime || 3;
   var timeLimit = DATA.timeLimit || 30;
@@ -651,9 +654,10 @@ const DATA = null;
     return a;
   }
 
-  function getSlotCount(layout) {
+  function getSlotCount(layout, partsLen) {
     if (layout === 'left-right-right') return 3;
     if (layout === 'surround') return 2; // outer, inner
+    if (partsLen && partsLen > 2) return partsLen;
     return 2; // left-right, top-bottom
   }
 
@@ -665,7 +669,7 @@ const DATA = null;
 
   function renderGame() {
     var p = problems[currentIndex];
-    var slotCount = getSlotCount(p.layout);
+    var slotCount = getSlotCount(p.layout, p.parts.length);
     slotState = new Array(slotCount).fill(null);
 
     var allParts = p.parts.concat(p.dummies || []);
