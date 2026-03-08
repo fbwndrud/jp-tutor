@@ -412,6 +412,104 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+/* Minigame Stats */
+.mg-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.mg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mg-item {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.mg-item:hover { transform: translateY(-2px); }
+
+.mg-item.locked {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mg-item.locked:hover { transform: none; }
+
+.mg-name {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.mg-tier {
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.mg-plays {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.mg-mini-chart {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 3px;
+  height: 24px;
+  margin-top: 6px;
+}
+
+.mg-mini-bar {
+  width: 8px;
+  border-radius: 2px;
+  transition: height 0.3s ease;
+}
+
+.mg-lock-icon {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+  opacity: 0.5;
+}
+
+.mg-time-bar {
+  margin-top: 10px;
+}
+
+.mg-time-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.mg-time-track {
+  height: 6px;
+  background: var(--bg-sunken);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mg-time-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--mint), var(--accent));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
 .empty-state {
   text-align: center;
   color: var(--text-secondary);
@@ -472,8 +570,25 @@ const DATA = null;
     grammar: '문법',
     culture: '문화',
     review: '복습',
-    daily: '데일리'
+    daily: '데일리',
+    minigame: '미니게임'
   };
+
+  var gameNames = {
+    matching_card: '매칭 카드',
+    shuffle_puzzle: '셔플 퍼즐',
+    snake_match: '스네이크 매치',
+    stroke_practice: '따라 쓰기',
+    listen_draw: '듣고 그리기',
+    radical_assembly: '한자 조립',
+    particle_battle: '파티클 배틀',
+    keigo_transformer: '경어 변환',
+    context_detective: '문맥 추리',
+    shiritori: '끝말잇기'
+  };
+
+  var allGameKeys = ['matching_card', 'shuffle_puzzle', 'snake_match', 'stroke_practice', 'listen_draw', 'radical_assembly', 'particle_battle', 'keigo_transformer', 'context_detective', 'shiritori'];
+  var mg = DATA.minigames || {};
 
   function modeName(m) { return modeLabels[m] || m; }
 
@@ -584,6 +699,55 @@ const DATA = null;
       }
       html += '</div></div>';
     });
+    html += '</div>';
+  }
+
+  // Minigame Stats
+  var mgUnlocked = mg.unlocked || [];
+  var mgStats = mg.stats || {};
+  if (mgUnlocked.length > 0 || Object.keys(mgStats).length > 0) {
+    html += '<div class="card">';
+    html += '<div class="mg-title">&#x1F3AE; 미니게임</div>';
+    html += '<div class="mg-grid">';
+    allGameKeys.forEach(function(key) {
+      var isUnlocked = mgUnlocked.indexOf(key) !== -1;
+      var stat = mgStats[key];
+      if (isUnlocked) {
+        html += '<div class="mg-item">';
+        html += '<div class="mg-name">' + esc(gameNames[key] || key) + '</div>';
+        if (stat) {
+          var tierStars = '';
+          for (var t = 0; t < (stat.current_tier || 1); t++) tierStars += '\u2605';
+          for (var t = (stat.current_tier || 1); t < 4; t++) tierStars += '\u2606';
+          html += '<div class="mg-tier">' + tierStars + '</div>';
+          html += '<div class="mg-plays">' + (stat.plays || 0) + '회 플레이</div>';
+          var scores = stat.recent_scores || [];
+          if (scores.length > 0) {
+            html += '<div class="mg-mini-chart">';
+            scores.forEach(function(sc) {
+              var h = Math.max(4, Math.round(sc / 100 * 24));
+              var col = sc >= 80 ? 'var(--badge-green)' : sc >= 50 ? 'var(--badge-yellow)' : 'var(--badge-red)';
+              html += '<div class="mg-mini-bar" style="height:' + h + 'px;background:' + col + '"></div>';
+            });
+            html += '</div>';
+          }
+        } else {
+          html += '<div class="mg-tier" style="color:var(--text-muted)">미플레이</div>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="mg-item locked" title="잠금">';
+        html += '<div class="mg-lock-icon">&#x1F512;</div>';
+        html += '<div class="mg-name">' + esc(gameNames[key] || key) + '</div>';
+        html += '</div>';
+      }
+    });
+    html += '</div>';
+    var todayMin = mg.total_game_minutes_today || 0;
+    html += '<div class="mg-time-bar">';
+    html += '<div class="mg-time-label"><span>오늘 게임 시간</span><span>' + todayMin + ' / 30분</span></div>';
+    html += '<div class="mg-time-track"><div class="mg-time-fill" style="width:' + Math.min(100, todayMin / 30 * 100) + '%"></div></div>';
+    html += '</div>';
     html += '</div>';
   }
 
