@@ -204,7 +204,14 @@ fi
 ### 방식 2: HTML 기반 TTS (Cowork/원격 환경 — 기본값)
 
 Cowork 등 원격 Linux 환경에서는 CLI TTS가 유저 스피커에 도달하지 않습니다.
-대신 **HTML 파일에 Web Speech API를 내장**하여 유저 브라우저에서 직접 발음합니다.
+대신 **HTML TTS 플레이어 템플릿**(`skills/jp/references/templates/tts-player.html`)을 사용합니다.
+
+TTS 플레이어 기능:
+- **음성 선택**: 브라우저에서 사용 가능한 일본어 음성 목록을 표시하고 유저가 선택 (macOS: Kyoko/Otoya, Chrome: Google 日本語 등)
+- **속도 조절**: 0.3x ~ 1.5x 슬라이더
+- **전체 재생**: 모든 단어를 순서대로 자동 재생
+- **반복 재생**: 루프 기능
+- **키보드 단축키**: Space(재생/정지), 좌우 화살표(이전/다음)
 
 퀴즈/학습 세션에서 발음을 들려줘야 할 때, 다음과 같은 HTML 파일을 생성합니다:
 
@@ -243,11 +250,18 @@ function speak(text) {
 
 ### HTML TTS 플레이어 생성 규칙
 
-학습 세션에서 발음이 필요한 단어/문장이 있을 때:
-1. `jp-data/tts-player.html` 파일을 생성 (또는 갱신)
-2. 해당 세션의 모든 일본어 텍스트를 발음 버튼으로 나열
-3. "발음을 듣고 싶으면 `jp-data/tts-player.html`을 브라우저에서 열어주세요" 안내
-4. 기존 HTML 템플릿(flashcard, kana-chart 등)에도 Web Speech API 발음 버튼 추가 가능
+**중요: 신규 개념 학습 시 TTS는 퀴즈 전에 먼저 제공합니다.**
+
+학습 흐름: 개념 소개 → TTS 발음 듣기 → 퀴즈
+
+1. `skills/jp/references/templates/tts-player.html` 템플릿을 읽습니다.
+2. `const DATA = null;`을 실제 데이터 JSON으로 치환합니다:
+   ```json
+   { "title": "세션 제목", "rate": 0.8, "words": [{ "jp": "日本語", "reading": "にほんご", "meaning": "일본어" }] }
+   ```
+3. `jp-data/tts-player.html`로 저장합니다.
+4. "발음을 먼저 들어보세요!" 안내 후, 유저가 준비되면 퀴즈를 시작합니다.
+5. 기존 HTML 템플릿(flashcard, kana-chart 등)에도 Web Speech API 발음 버튼이 내장되어 있습니다.
 
 ## 언어 규칙
 

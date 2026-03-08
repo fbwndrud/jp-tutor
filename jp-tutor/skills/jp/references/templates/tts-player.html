@@ -3,92 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>발음 플레이어</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap">
+<title>TTS Player</title>
 <style>
 :root {
-  --bg: #f8f9fa;
-  --bg-card: #ffffff;
-  --text: #2c3e50;
-  --text-secondary: #6c757d;
-  --border: #e9ecef;
+  --bg: #F7F6F3;
+  --bg-card: #FFFFFF;
+  --text: #1C1C1E;
+  --text-secondary: #6C6C70;
+  --text-muted: #AEAEB2;
+  --border: #E5E5EA;
   --accent: #4A90D9;
-  --accent-hover: #357ABD;
+  --accent-hover: #3A7BC8;
+  --accent-light: #EBF3FC;
   --green: #27AE60;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.1);
+  --radius: 14px;
+  --radius-sm: 10px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1a1a2e;
-    --bg-card: #16213e;
-    --text: #e0e0e0;
-    --text-secondary: #a0a0b0;
-    --border: #2a2a4a;
-    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    --bg: #0F0F1A;
+    --bg-card: #1A1A2E;
+    --text: #E8E6E1;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+    --border: #2A2A3E;
+    --accent-light: #1A2540;
+    --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.2);
+    --shadow-lg: 0 4px 8px rgba(0,0,0,0.2), 0 12px 28px rgba(0,0,0,0.3);
   }
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
   padding: 16px;
 }
 
-.container {
-  max-width: 500px;
-  margin: 0 auto;
+.container { max-width: 480px; margin: 0 auto; }
+
+/* Now Playing */
+.now-playing {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 24px 24px;
+  text-align: center;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
 }
 
-h1 {
-  font-size: 1.3rem;
-  text-align: center;
-  margin-bottom: 4px;
+.now-playing::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-.subtitle {
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+.now-playing.active::before { opacity: 1; }
+
+.np-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
   margin-bottom: 16px;
 }
 
+.np-japanese {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  transition: color 0.3s;
+}
+
+.now-playing.active .np-japanese { color: var(--accent); }
+
+.np-reading {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.np-meaning {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* Playback Controls */
 .controls {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
-.btn-control {
-  flex: 1;
-  padding: 10px;
+.btn-ctrl {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 1px solid var(--border);
-  border-radius: 8px;
   background: var(--bg-card);
   color: var(--text);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
 }
 
-.btn-control:hover { background: var(--border); }
-.btn-control.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-ctrl:hover { background: var(--border); }
 
-.speed-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+.btn-play {
+  width: 52px;
+  height: 52px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;
 }
 
-.speed-row label { min-width: 40px; }
+.btn-play:hover { background: var(--accent-hover); }
+
+.np-counter {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* Settings */
+.settings {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setting-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 36px;
+}
+
+.voice-select {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+.voice-select:focus { border-color: var(--accent); }
 
 .speed-slider {
   flex: 1;
@@ -101,82 +200,149 @@ h1 {
 
 .speed-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 
-.speed-value {
-  min-width: 35px;
+.speed-val {
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 32px;
   text-align: right;
+}
+
+.toggle-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-toggle {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-toggle:hover { background: var(--border); }
+.btn-toggle.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Playlist */
+.playlist-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.playlist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pl-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pl-item:hover { border-color: var(--accent); }
+
+.pl-item.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.pl-num {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 18px;
+}
+
+.pl-item.active .pl-num { color: var(--accent); }
+
+.pl-text { flex: 1; min-width: 0; }
+
+.pl-jp {
+  font-size: 1.15rem;
   font-weight: 600;
 }
 
-.word-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.pl-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
-.word-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: var(--shadow);
-}
-
-.word-item:hover { border-color: var(--accent); }
-.word-item.playing { border-color: var(--accent); background: rgba(74,144,217,0.08); }
-
-.play-icon {
-  width: 32px;
-  height: 32px;
+.pl-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+  background: var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
   flex-shrink: 0;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
-.word-item.playing .play-icon { background: var(--green); }
-
-.word-text {
-  flex: 1;
-  min-width: 0;
+.pl-item.active .pl-icon {
+  background: var(--accent);
+  color: #fff;
 }
 
-.word-jp {
-  font-size: 1.3rem;
-  font-weight: 600;
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
 }
 
-.word-reading {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+.now-playing.active .btn-play {
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.word-meaning {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.no-tts {
+.container > * { animation: fadeIn 0.3s ease-out; }
+
+.empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 48px 20px;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.voice-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 480px) {
+  .np-japanese { font-size: 2.2rem; }
 }
 </style>
 </head>
@@ -191,19 +357,31 @@ const DATA = null;
   var app = document.getElementById('app');
 
   if (!DATA || !DATA.words || DATA.words.length === 0) {
-    app.innerHTML = '<div class="no-tts">데이터를 불러오는 중...</div>';
+    app.innerHTML = '<div class="empty-state">No data.</div>';
     return;
   }
 
   if (!('speechSynthesis' in window)) {
-    app.innerHTML = '<div class="no-tts">이 브라우저는 음성 합성을 지원하지 않습니다.<br>Chrome, Safari, Edge 등 최신 브라우저를 사용해주세요.</div>';
+    app.innerHTML = '<div class="empty-state">Web Speech API not supported.<br>Please use Chrome, Safari, or Edge.</div>';
     return;
   }
 
+  var jaVoices = [];
+  var selectedVoiceIdx = 0;
   var rate = DATA.rate || 0.8;
+  var currentIdx = 0;
+  var isPlaying = false;
   var isAutoPlaying = false;
-  var autoPlayIndex = 0;
-  var currentPlaying = -1;
+  var isLooping = false;
+
+  function loadVoices() {
+    var all = speechSynthesis.getVoices();
+    jaVoices = all.filter(function(v) { return v.lang && v.lang.startsWith('ja'); });
+    if (jaVoices.length === 0) {
+      jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
+    }
+    render();
+  }
 
   function esc(s) {
     if (s == null) return '';
@@ -212,91 +390,170 @@ const DATA = null;
     return d.innerHTML;
   }
 
-  function speak(text, idx, onEnd) {
+  function getVoice() {
+    return jaVoices.length > 0 ? jaVoices[selectedVoiceIdx] : null;
+  }
+
+  function speak(text, onEnd) {
     speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
     u.rate = rate;
+    var v = getVoice();
+    if (v) u.voice = v;
 
-    var voices = speechSynthesis.getVoices();
-    var jaVoice = voices.find(function(v) { return v.lang.startsWith('ja'); });
-    if (jaVoice) u.voice = jaVoice;
-
-    currentPlaying = idx;
+    isPlaying = true;
     render();
 
     u.onend = function() {
-      currentPlaying = -1;
+      isPlaying = false;
       render();
       if (onEnd) onEnd();
     };
-
     u.onerror = function() {
-      currentPlaying = -1;
+      isPlaying = false;
       render();
       if (onEnd) onEnd();
     };
-
     speechSynthesis.speak(u);
   }
 
-  function playAll() {
-    if (isAutoPlaying) {
-      isAutoPlaying = false;
-      speechSynthesis.cancel();
-      currentPlaying = -1;
-      render();
-      return;
-    }
-
-    isAutoPlaying = true;
-    autoPlayIndex = 0;
-    render();
-    playNext();
-  }
-
-  function playNext() {
-    if (!isAutoPlaying || autoPlayIndex >= DATA.words.length) {
-      isAutoPlaying = false;
-      currentPlaying = -1;
-      render();
-      return;
-    }
-
-    var word = DATA.words[autoPlayIndex];
-    speak(word.jp, autoPlayIndex, function() {
-      autoPlayIndex++;
+  function playCurrent() {
+    var w = DATA.words[currentIdx];
+    if (!w) return;
+    speak(w.jp, function() {
       if (isAutoPlaying) {
-        setTimeout(playNext, 600);
+        setTimeout(playNext, 500);
       }
     });
   }
 
+  function playNext() {
+    if (currentIdx < DATA.words.length - 1) {
+      currentIdx++;
+      playCurrent();
+    } else if (isLooping) {
+      currentIdx = 0;
+      playCurrent();
+    } else {
+      isAutoPlaying = false;
+      isPlaying = false;
+      render();
+    }
+  }
+
+  function playPrev() {
+    if (currentIdx > 0) {
+      currentIdx--;
+      playCurrent();
+    }
+  }
+
+  function toggleAutoPlay() {
+    if (isAutoPlaying) {
+      isAutoPlaying = false;
+      speechSynthesis.cancel();
+      isPlaying = false;
+      render();
+    } else {
+      isAutoPlaying = true;
+      playCurrent();
+    }
+  }
+
+  function togglePlay() {
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      isPlaying = false;
+      isAutoPlaying = false;
+      render();
+    } else {
+      playCurrent();
+    }
+  }
+
+  function selectWord(idx) {
+    isAutoPlaying = false;
+    currentIdx = idx;
+    playCurrent();
+  }
+
   function render() {
+    var w = DATA.words[currentIdx];
     var html = '';
-    html += '<h1>' + esc(DATA.title || '발음 플레이어') + '</h1>';
-    html += '<div class="subtitle">' + DATA.words.length + '개 단어 / 문장</div>';
+
+    // Now Playing
+    html += '<div class="now-playing' + (isPlaying ? ' active' : '') + '">';
+    html += '<div class="np-label">Now Playing</div>';
+    html += '<div class="np-japanese">' + esc(w.jp) + '</div>';
+    if (w.reading) html += '<div class="np-reading">' + esc(w.reading) + '</div>';
+    if (w.meaning) html += '<div class="np-meaning">' + esc(w.meaning) + '</div>';
 
     html += '<div class="controls">';
-    html += '<button class="btn-control' + (isAutoPlaying ? ' active' : '') + '" id="btn-autoplay">' + (isAutoPlaying ? '정지' : '전체 재생') + '</button>';
+    html += '<button class="btn-ctrl" id="btn-prev" title="Previous">\u23EE</button>';
+    html += '<button class="btn-ctrl btn-play" id="btn-play" title="' + (isPlaying ? 'Stop' : 'Play') + '">' + (isPlaying ? '\u23F8' : '\u25B6') + '</button>';
+    html += '<button class="btn-ctrl" id="btn-next" title="Next">\u23ED</button>';
+    html += '</div>';
+    html += '<div class="np-counter">' + (currentIdx + 1) + ' / ' + DATA.words.length + '</div>';
     html += '</div>';
 
-    html += '<div class="speed-row">';
-    html += '<label>속도</label>';
+    // Settings
+    html += '<div class="settings">';
+
+    // Voice selector
+    if (jaVoices.length > 1) {
+      html += '<div class="setting-row">';
+      html += '<span class="setting-label">Voice</span>';
+      html += '<select class="voice-select" id="voice-sel">';
+      jaVoices.forEach(function(v, i) {
+        var label = v.name.replace('Google ', '').replace('Microsoft ', 'MS ');
+        if (v.localService) label += ' (local)';
+        html += '<option value="' + i + '"' + (i === selectedVoiceIdx ? ' selected' : '') + '>' + esc(label) + '</option>';
+      });
+      html += '</select>';
+      html += '</div>';
+    } else if (jaVoices.length === 1) {
+      html += '<div class="setting-row">';
+      html += '<span class="setting-label">Voice</span>';
+      html += '<span class="voice-info">' + esc(jaVoices[0].name) + '</span>';
+      html += '</div>';
+    } else {
+      html += '<div class="setting-row">';
+      html += '<span class="setting-label">Voice</span>';
+      html += '<span class="voice-info">Loading voices...</span>';
+      html += '</div>';
+    }
+
+    // Speed
+    html += '<div class="setting-row">';
+    html += '<span class="setting-label">Speed</span>';
     html += '<input type="range" class="speed-slider" id="speed" min="0.3" max="1.5" step="0.1" value="' + rate + '">';
-    html += '<span class="speed-value" id="speed-val">' + rate.toFixed(1) + 'x</span>';
+    html += '<span class="speed-val" id="speed-val">' + rate.toFixed(1) + 'x</span>';
     html += '</div>';
 
-    html += '<div class="word-list">';
+    // Toggles
+    html += '<div class="toggle-row">';
+    html += '<button class="btn-toggle' + (isAutoPlaying ? ' active' : '') + '" id="btn-autoplay">' + (isAutoPlaying ? '\u23F9 Stop' : '\u25B6 Play All') + '</button>';
+    html += '<button class="btn-toggle' + (isLooping ? ' active' : '') + '" id="btn-loop">\u{1F501} Loop</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Playlist
+    html += '<div class="playlist-header">Playlist (' + DATA.words.length + ')</div>';
+    html += '<div class="playlist">';
     DATA.words.forEach(function(w, i) {
-      var playing = (currentPlaying === i) ? ' playing' : '';
-      html += '<div class="word-item' + playing + '" data-idx="' + i + '">';
-      html += '<div class="play-icon">' + (currentPlaying === i ? '||' : '\u25B6') + '</div>';
-      html += '<div class="word-text">';
-      html += '<div class="word-jp">' + esc(w.jp) + '</div>';
-      if (w.reading) html += '<div class="word-reading">' + esc(w.reading) + '</div>';
-      if (w.meaning) html += '<div class="word-meaning">' + esc(w.meaning) + '</div>';
-      html += '</div></div>';
+      var active = i === currentIdx;
+      html += '<div class="pl-item' + (active ? ' active' : '') + '" data-idx="' + i + '">';
+      html += '<span class="pl-num">' + (i + 1) + '</span>';
+      html += '<div class="pl-text">';
+      html += '<div class="pl-jp">' + esc(w.jp) + '</div>';
+      var sub = [];
+      if (w.reading) sub.push(w.reading);
+      if (w.meaning) sub.push(w.meaning);
+      if (sub.length) html += '<div class="pl-sub">' + esc(sub.join(' \u00B7 ')) + '</div>';
+      html += '</div>';
+      html += '<div class="pl-icon">' + (active && isPlaying ? '\u23F8' : '\u25B6') + '</div>';
+      html += '</div>';
     });
     html += '</div>';
 
@@ -305,33 +562,67 @@ const DATA = null;
   }
 
   function bindEvents() {
-    document.querySelectorAll('.word-item').forEach(function(el) {
-      el.addEventListener('click', function() {
-        var idx = parseInt(el.dataset.idx);
-        var word = DATA.words[idx];
-        isAutoPlaying = false;
-        speak(word.jp, idx);
-      });
+    var btnPlay = document.getElementById('btn-play');
+    if (btnPlay) btnPlay.addEventListener('click', togglePlay);
+
+    var btnPrev = document.getElementById('btn-prev');
+    if (btnPrev) btnPrev.addEventListener('click', function() {
+      isAutoPlaying = false;
+      playPrev();
     });
 
-    var btn = document.getElementById('btn-autoplay');
-    if (btn) btn.addEventListener('click', playAll);
+    var btnNext = document.getElementById('btn-next');
+    if (btnNext) btnNext.addEventListener('click', function() {
+      isAutoPlaying = false;
+      if (currentIdx < DATA.words.length - 1) {
+        currentIdx++;
+        playCurrent();
+      }
+    });
 
-    var slider = document.getElementById('speed');
-    if (slider) {
-      slider.addEventListener('input', function() {
-        rate = parseFloat(slider.value);
-        document.getElementById('speed-val').textContent = rate.toFixed(1) + 'x';
+    var voiceSel = document.getElementById('voice-sel');
+    if (voiceSel) voiceSel.addEventListener('change', function() {
+      selectedVoiceIdx = parseInt(voiceSel.value);
+    });
+
+    var speedSlider = document.getElementById('speed');
+    if (speedSlider) speedSlider.addEventListener('input', function() {
+      rate = parseFloat(speedSlider.value);
+      document.getElementById('speed-val').textContent = rate.toFixed(1) + 'x';
+    });
+
+    var btnAutoplay = document.getElementById('btn-autoplay');
+    if (btnAutoplay) btnAutoplay.addEventListener('click', toggleAutoPlay);
+
+    var btnLoop = document.getElementById('btn-loop');
+    if (btnLoop) btnLoop.addEventListener('click', function() {
+      isLooping = !isLooping;
+      render();
+    });
+
+    document.querySelectorAll('.pl-item').forEach(function(el) {
+      el.addEventListener('click', function() {
+        selectWord(parseInt(el.dataset.idx));
       });
-    }
+    });
   }
 
-  // Voices may load async
+  // Load voices (async in some browsers)
   if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = function() {};
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
   }
+  loadVoices();
 
-  render();
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+    else if (e.key === 'ArrowLeft') { isAutoPlaying = false; playPrev(); }
+    else if (e.key === 'ArrowRight') {
+      isAutoPlaying = false;
+      if (currentIdx < DATA.words.length - 1) { currentIdx++; playCurrent(); }
+    }
+  });
 })();
 </script>
 </body>
