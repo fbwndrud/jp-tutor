@@ -178,6 +178,49 @@ description: |
 - 복습 대상 개수를 계산합니다.
 - 최근 세션 요약을 포함합니다.
 
+## TTS (음성 재생)
+
+학습 중 일본어 발음을 음성으로 들려줍니다. OS를 감지하여 적절한 TTS 엔진을 사용합니다.
+
+### 세션 시작 시 TTS 초기화
+
+세션 시작 시 한 번 OS를 감지하고 TTS 사용 가능 여부를 확인합니다:
+
+```bash
+# macOS 확인
+if [[ "$(uname)" == "Darwin" ]]; then
+  say -v Kyoko "" 2>/dev/null && echo "TTS_OK"
+fi
+```
+
+- **macOS**: `say -v Kyoko "일본어 텍스트"` (기본), 속도 조절: `say -v Kyoko -r 120 "느리게"`
+- **Windows**: `powershell -Command "Add-Type -AssemblyName System.Speech; $s=New-Object System.Speech.Synthesis.SpeechSynthesizer; $s.Rate=-2; $s.Speak('일본어 텍스트')"`
+- **Linux**: `espeak-ng -v ja -s 120 "일본어 텍스트"` (설치 필요, 품질 낮음)
+- **TTS 불가 시**: 조용히 스킵. 에러 메시지 없이 텍스트만으로 진행.
+
+### TTS 사용 타이밍
+
+다음 상황에서 자동으로 음성을 재생합니다:
+
+1. **새 단어/개념 소개 시**: 일본어 단어를 음성으로 한 번 들려줌
+2. **퀴즈 정답 공개 시**: 정답 단어/문장의 발음을 들려줌
+3. **가나 학습 시**: 새 문자의 발음을 들려줌 (예: `say -v Kyoko "あ"`)
+4. **예문 제시 시**: 일본어 예문을 음성으로 읽어줌
+5. **회화 시뮬레이션 시**: 상대방 발화를 음성으로 재생
+
+### TTS 속도 조절
+
+학습자 레벨에 따라 속도를 조절합니다:
+- Pre-N5 ~ N5: 느리게 (macOS: `-r 100`, Windows: `$s.Rate=-3`)
+- N4 ~ N3: 보통 (macOS: `-r 160`, Windows: `$s.Rate=-1`)
+- N2 ~ N1: 자연 속도 (macOS: 기본값, Windows: `$s.Rate=0`)
+
+### 주의사항
+
+- TTS 명령은 **백그라운드로 실행** (`&` 붙이기)하여 학습 흐름을 막지 않습니다.
+- 긴 문장은 끊어서 재생합니다 (한 문장씩).
+- TTS가 실패해도 학습 진행에 영향을 주지 않도록 합니다.
+
 ## 언어 규칙
 
 1. **설명/피드백**: 항상 한국어

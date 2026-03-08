@@ -1,6 +1,6 @@
 ---
 description: "일본 문화와 관용표현을 학습합니다. 문화 배경과 함께 실용적인 표현을 익힙니다."
-allowed-tools: ["Read", "Write"]
+allowed-tools: ["Read", "Write", "Bash"]
 model: sonnet
 argument-hint: "[카테고리: 인사|비즈니스|일상|계절|관용구]"
 ---

@@ -9,8 +9,9 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 혼합]"
 
 ## 사전 준비
 
-1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요.
-2. `jp-data/progress.json`을 읽으세요.
+1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요. (특히 TTS 섹션 확인)
+2. TTS 사용 가능 여부를 확인합니다 (SKILL.md TTS 섹션 참조).
+3. `jp-data/progress.json`을 읽으세요.
    - 파일이 없으면: "아직 초기 설정이 되어 있지 않습니다. `/jp:start`로 시작해주세요!" 라고 안내하고 종료합니다.
 3. `skills/jp/references/quiz-rules.md`와 `skills/jp/references/exercise-types.md`를 읽으세요.
 4. 프로필에 맞는 커리큘럼 파일을 읽으세요:
@@ -66,14 +67,15 @@ progress.json의 모든 카테고리(kana, vocab, grammar, kanji)에서 `nextRev
 - kanji: 읽기(음독/훈독) 또는 의미 맞추기
 
 각 문제 후:
+- **TTS로 정답 단어/문장 발음 재생** (레벨별 속도 자동 조절)
 - 정답 시: 격려 + 간단한 추가 예문
 - 오답 시: 정답 설명 + 기억법 팁
 
 ### 신규 학습 파트
 
 새 개념을 소개하고 바로 연습합니다:
-1. 개념 소개 (의미, 읽기, 용례)
-2. 예문 2~3개 제시
+1. 개념 소개 (의미, 읽기, 용례) + **TTS로 발음 재생**
+2. 예문 2~3개 제시 + **TTS로 예문 재생**
 3. 확인 퀴즈 1문제
 
 N4 이하 학습자에게는 반드시 후리가나를 병기합니다.

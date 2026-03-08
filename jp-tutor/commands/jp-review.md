@@ -9,8 +9,9 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 전체]"
 
 ## 사전 준비
 
-1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요.
-2. `jp-data/progress.json`을 읽으세요.
+1. `skills/jp/SKILL.md` 스킬 파일을 읽어 튜터 역할을 숙지하세요. (특히 TTS 섹션 확인)
+2. TTS 사용 가능 여부를 확인합니다 (SKILL.md TTS 섹션 참조).
+3. `jp-data/progress.json`을 읽으세요.
    - 파일이 없으면: "아직 초기 설정이 되어 있지 않습니다. `/jp:start`로 시작해주세요!" 라고 안내하고 종료합니다.
 3. `skills/jp/references/quiz-rules.md`를 읽어 퀴즈 규칙을 숙지하세요.
 
@@ -68,6 +69,7 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 전체]"
    - kanji: 읽기(음독/훈독), 의미, 쓰기
 2. 사용자 답변 받기
 3. 채점 및 피드백:
+   - **TTS로 정답 발음 재생** (레벨별 속도 조절)
    - 정답: 간단한 격려 + 현재 배지 → 다음 배지 진행 상황
    - 오답: 정답 제시 + 핵심 설명 + 기억법 팁
 

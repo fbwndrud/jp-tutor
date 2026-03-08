@@ -1,6 +1,6 @@
 ---
 description: "일본어 문법 연습을 시작합니다. 문법 포인트 설명과 드릴을 제공합니다."
-allowed-tools: ["Read", "Write"]
+allowed-tools: ["Read", "Write", "Bash"]
 model: sonnet
 argument-hint: "[레벨] [문법 포인트]"
 ---

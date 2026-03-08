@@ -1,6 +1,6 @@
 ---
 description: "일본어 번역 연습을 시작합니다. 한일/일한 번역과 상세 피드백을 제공합니다."
-allowed-tools: ["Read", "Write"]
+allowed-tools: ["Read", "Write", "Bash"]
 model: sonnet
 argument-hint: "[방향: 한일|일한] [레벨] [주제]"
 ---
