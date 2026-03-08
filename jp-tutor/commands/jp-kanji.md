@@ -1,7 +1,7 @@
 ---
 description: "일본어 한자 학습을 시작합니다. 플래시카드 학습 후 확인 퀴즈를 진행합니다."
 allowed-tools: ["Read", "Write", "Bash"]
-model: haiku
+model: sonnet
 argument-hint: "[레벨] [그룹]"
 ---
 

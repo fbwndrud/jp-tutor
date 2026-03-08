@@ -1,7 +1,7 @@
 ---
 description: "일본어 어휘 퀴즈를 시작합니다. 4지선다 객관식으로 단어를 테스트합니다."
 allowed-tools: ["Read", "Write", "Bash"]
-model: haiku
+model: sonnet
 argument-hint: "[레벨] [주제]"
 ---
 

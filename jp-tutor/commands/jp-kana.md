@@ -1,7 +1,7 @@
 ---
 description: "히라가나/카타카나 학습. 완전 초보자를 위한 가나 문자 학습, 퀴즈, 50음도 차트를 제공합니다."
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Bash"]
-model: haiku
+model: sonnet
 argument-hint: "[모드: chart|quiz|stage 또는 빈칸으로 자동 진행]"
 ---
 

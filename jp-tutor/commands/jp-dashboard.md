@@ -1,7 +1,7 @@
 ---
 description: "학습 대시보드. 현재 학습 현황, 배지 분포, 복습 예정, 추천 등을 요약하여 보여줍니다."
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Bash"]
-model: haiku
+model: sonnet
 argument-hint: ""
 ---
 

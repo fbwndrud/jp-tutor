@@ -1,7 +1,7 @@
 ---
 description: "학습 데이터 내보내기. 어휘/문법/한자 목록을 CSV, Anki 덱 형식으로 내보냅니다."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
-model: haiku
+model: sonnet
 argument-hint: "[형식: csv|anki] [카테고리: kana|vocab|grammar|kanji|business|textbook] [범위]"
 ---
 
