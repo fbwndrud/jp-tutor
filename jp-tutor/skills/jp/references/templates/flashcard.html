@@ -558,6 +558,12 @@ const DATA = null;
       jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
     }
     jaVoices = sortVoices(jaVoices);
+    if (DATA.preferredVoice && jaVoices.length > 0) {
+      var pref = DATA.preferredVoice.toLowerCase();
+      for (var i = 0; i < jaVoices.length; i++) {
+        if (jaVoices[i].name.toLowerCase().indexOf(pref) !== -1) { selectedVoiceIdx = i; break; }
+      }
+    }
     render();
   }
 

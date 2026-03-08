@@ -55,6 +55,7 @@ description: |
 {
   "profile": "jlpt",
   "level": "N4",
+  "preferredVoice": null,
   "created": "2026-03-08",
   "lastSession": "2026-03-08",
   "xp": 0,
@@ -257,11 +258,14 @@ function speak(text) {
 1. `skills/jp/references/templates/tts-player.html` 템플릿을 읽습니다.
 2. `const DATA = null;`을 실제 데이터 JSON으로 치환합니다:
    ```json
-   { "title": "세션 제목", "rate": 0.8, "words": [{ "jp": "日本語", "reading": "にほんご", "meaning": "일본어" }] }
+   { "title": "세션 제목", "rate": 0.8, "preferredVoice": "Kyoko", "words": [{ "jp": "日本語", "reading": "にほんご", "meaning": "일본어" }] }
    ```
+   - `preferredVoice`: `progress.json`의 `preferredVoice` 값을 전달합니다. null이면 자동 선택.
+   - flashcard, kana-chart 템플릿에도 `DATA.preferredVoice`를 동일하게 전달합니다.
 3. `jp-data/tts-player.html`로 저장합니다.
 4. "발음을 먼저 들어보세요!" 안내 후, 유저가 준비되면 퀴즈를 시작합니다.
 5. 기존 HTML 템플릿(flashcard, kana-chart 등)에도 Web Speech API 발음 버튼이 내장되어 있습니다.
+6. 유저가 "음성 바꿔줘", "Kyoko로 해줘" 등 요청하면 `progress.json`의 `preferredVoice`를 업데이트합니다.
 
 ## 언어 규칙
 
