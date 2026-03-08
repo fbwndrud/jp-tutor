@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>플래시카드</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --bg-card-back: #fafbfc;
+  --text: #2c3e50;
+  --text-secondary: #6c757d;
+  --border: #e9ecef;
+  --badge-blue: #4A90D9;
+  --badge-green: #27AE60;
+  --badge-yellow: #F39C12;
+  --badge-red: #E74C3C;
+  --badge-gray: #BDC3C7;
+  --accent: #4A90D9;
+  --shadow: 0 4px 16px rgba(0,0,0,0.1);
+  --radius: 16px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-card-back: #1a2540;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b0;
+    --border: #2a2a4a;
+    --shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+/* Top bar */
+.topbar {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.topbar-info {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.topbar-info strong { color: var(--text); }
+
+.btn-shuffle {
+  background: var(--border);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.btn-shuffle:hover { background: var(--badge-gray); }
+
+/* Progress bar */
+.progress-wrap {
+  width: 100%;
+  max-width: 500px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Card area */
+.card-area {
+  width: 100%;
+  max-width: 500px;
+  perspective: 1000px;
+  margin-bottom: 20px;
+}
+
+.card-container {
+  width: 100%;
+  min-height: 320px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.card-container.flipped { transform: rotateY(180deg); }
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  min-height: 320px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+}
+
+.card-front {
+  background: var(--bg-card);
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.card-back {
+  background: var(--bg-card-back);
+  transform: rotateY(180deg);
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.front-text {
+  font-size: 3rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.front-hint {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Back content */
+.back-section {
+  margin-bottom: 14px;
+}
+
+.back-section:last-child { margin-bottom: 0; }
+
+.back-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.back-value {
+  font-size: 1rem;
+}
+
+.back-value.large {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.back-list {
+  list-style: none;
+  padding: 0;
+}
+
+.back-list li {
+  font-size: 0.9rem;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-list li:last-child { border-bottom: none; }
+
+/* Assessment buttons */
+.assess-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.btn-assess {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  color: #fff;
+}
+
+.btn-assess:active { transform: scale(0.95); }
+.btn-assess.green { background: var(--badge-green); }
+.btn-assess.yellow { background: var(--badge-yellow); }
+.btn-assess.red { background: var(--badge-red); }
+
+/* Navigation */
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.btn-nav {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--bg-card);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-nav:hover { background: var(--border); }
+.btn-nav:disabled { opacity: 0.3; cursor: default; }
+.btn-nav:disabled:hover { background: var(--bg-card); }
+
+.counter {
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Results */
+.results {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px 24px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.results h2 {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+}
+
+.results-bars { margin-bottom: 24px; }
+
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.result-label {
+  width: 80px;
+  text-align: right;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.result-bar {
+  flex: 1;
+  height: 20px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.result-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.result-count {
+  width: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btn-restart {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-restart:hover { opacity: 0.85; }
+
+@media (max-width: 520px) {
+  .front-text { font-size: 2.2rem; }
+  .card-face { min-height: 280px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const DATA = null;
+
+(function() {
+  const app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading" role="status" aria-label="로딩 중">데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  var cards = DATA.cards.slice();
+  var idx = 0;
+  var flipped = false;
+  var results = []; // 'green' | 'yellow' | 'red' | null
+  var finished = false;
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  for (var i = 0; i < cards.length; i++) results.push(null);
+
+  function esc(str) {
+    if (str == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  function shuffle() {
+    for (var i = cards.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = cards[i]; cards[i] = cards[j]; cards[j] = t;
+      var r = results[i]; results[i] = results[j]; results[j] = r;
+    }
+    idx = 0;
+    flipped = false;
+    finished = false;
+    render();
+  }
+
+  function buildBack(card) {
+    var b = card.back;
+    var mode = DATA.mode;
+    var html = '';
+
+    if (mode === 'kanji') {
+      if (b.onyomi) html += '<div class="back-section"><div class="back-label">음독 (ON)</div><div class="back-value large">' + esc(b.onyomi) + '</div></div>';
+      if (b.kunyomi) html += '<div class="back-section"><div class="back-label">훈독 (KUN)</div><div class="back-value large">' + esc(b.kunyomi) + '</div></div>';
+      if (b.meaning) html += '<div class="back-section"><div class="back-label">의미</div><div class="back-value">' + esc(b.meaning) + '</div></div>';
+      if (b.words && b.words.length) {
+        html += '<div class="back-section"><div class="back-label">관련 단어</div><ul class="back-list">';
+        b.words.forEach(function(w) { html += '<li>' + esc(w) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (b.similar && b.similar.length) {
+        html += '<div class="back-section"><div class="back-label">유사 한자</div><ul class="back-list">';
+        b.similar.forEach(function(w) { html += '<li>' + esc(w) + '</li>'; });
+        html += '</ul></div>';
+      }
+    } else if (mode === 'vocabulary') {
+      if (b.reading) html += '<div class="back-section"><div class="back-label">읽기</div><div class="back-value large">' + esc(b.reading) + '</div></div>';
+      if (b.meaning) html += '<div class="back-section"><div class="back-label">의미</div><div class="back-value">' + esc(b.meaning) + '</div></div>';
+      if (b.example) html += '<div class="back-section"><div class="back-label">예문</div><div class="back-value">' + esc(b.example) + '</div></div>';
+      if (b.similar && b.similar.length) {
+        html += '<div class="back-section"><div class="back-label">유사 단어</div><ul class="back-list">';
+        b.similar.forEach(function(w) { html += '<li>' + esc(w) + '</li>'; });
+        html += '</ul></div>';
+      }
+    } else if (mode === 'grammar') {
+      if (b.pattern) html += '<div class="back-section"><div class="back-label">패턴</div><div class="back-value large">' + esc(b.pattern) + '</div></div>';
+      if (b.meaning) html += '<div class="back-section"><div class="back-label">의미</div><div class="back-value">' + esc(b.meaning) + '</div></div>';
+      if (b.examples && b.examples.length) {
+        html += '<div class="back-section"><div class="back-label">예문</div><ul class="back-list">';
+        b.examples.forEach(function(w) { html += '<li>' + esc(w) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (b.comparison && b.comparison.length) {
+        html += '<div class="back-section"><div class="back-label">비교</div><ul class="back-list">';
+        b.comparison.forEach(function(w) { html += '<li>' + esc(w) + '</li>'; });
+        html += '</ul></div>';
+      }
+    } else if (mode === 'culture') {
+      if (b.literal) html += '<div class="back-section"><div class="back-label">직역</div><div class="back-value">' + esc(b.literal) + '</div></div>';
+      if (b.meaning) html += '<div class="back-section"><div class="back-label">의미</div><div class="back-value">' + esc(b.meaning) + '</div></div>';
+      if (b.usage) html += '<div class="back-section"><div class="back-label">사용법</div><div class="back-value">' + esc(b.usage) + '</div></div>';
+      if (b.koreanEquivalent) html += '<div class="back-section"><div class="back-label">한국어 대응</div><div class="back-value">' + esc(b.koreanEquivalent) + '</div></div>';
+    } else {
+      Object.keys(b).forEach(function(k) {
+        var v = b[k];
+        if (Array.isArray(v)) {
+          html += '<div class="back-section"><div class="back-label">' + esc(k) + '</div><ul class="back-list">';
+          v.forEach(function(item) { html += '<li>' + esc(item) + '</li>'; });
+          html += '</ul></div>';
+        } else {
+          html += '<div class="back-section"><div class="back-label">' + esc(k) + '</div><div class="back-value">' + esc(v) + '</div></div>';
+        }
+      });
+    }
+
+    return html;
+  }
+
+  function renderResults() {
+    var counts = { green: 0, yellow: 0, red: 0, none: 0 };
+    results.forEach(function(r) {
+      if (r === 'green') counts.green++;
+      else if (r === 'yellow') counts.yellow++;
+      else if (r === 'red') counts.red++;
+      else counts.none++;
+    });
+    var total = cards.length || 1;
+
+    var html = '<div class="results" role="region" aria-label="결과 요약">';
+    html += '<h2>학습 완료!</h2>';
+    html += '<div class="results-bars">';
+
+    var rows = [
+      { label: '알겠어요', count: counts.green, color: 'var(--badge-green)' },
+      { label: '애매해요', count: counts.yellow, color: 'var(--badge-yellow)' },
+      { label: '모르겠어요', count: counts.red, color: 'var(--badge-red)' }
+    ];
+    if (counts.none > 0) rows.push({ label: '미평가', count: counts.none, color: 'var(--badge-gray)' });
+
+    rows.forEach(function(r) {
+      html += '<div class="result-row">';
+      html += '<div class="result-label">' + r.label + '</div>';
+      html += '<div class="result-bar"><div class="result-fill" style="width:' + (r.count / total * 100) + '%;background:' + r.color + '"></div></div>';
+      html += '<div class="result-count">' + r.count + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+    html += '<button class="btn-restart" onclick="location.reload()" aria-label="다시 시작">다시 시작</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+  }
+
+  function render() {
+    if (finished) { renderResults(); return; }
+
+    var card = cards[idx];
+    var total = cards.length;
+    var pct = ((idx + 1) / total * 100).toFixed(1);
+
+    var modeLabels = { kanji: '한자', vocabulary: '어휘', grammar: '문법', culture: '문화' };
+    var modeLabel = modeLabels[DATA.mode] || DATA.mode;
+
+    var html = '';
+
+    // Top bar
+    html += '<div class="topbar">';
+    html += '<div class="topbar-info"><strong>' + esc(DATA.level) + '</strong> ' + esc(modeLabel) + '</div>';
+    html += '<button class="btn-shuffle" aria-label="순서 섞기">&#x1F500; 섞기</button>';
+    html += '</div>';
+
+    // Progress
+    html += '<div class="progress-wrap" role="progressbar" aria-valuenow="' + (idx + 1) + '" aria-valuemin="1" aria-valuemax="' + total + '">';
+    html += '<div class="progress-fill" style="width:' + pct + '%"></div></div>';
+
+    // Card
+    html += '<div class="card-area">';
+    html += '<div class="card-container' + (flipped ? ' flipped' : '') + '" role="button" aria-label="카드를 클릭하여 뒤집기" tabindex="0">';
+
+    // Front
+    html += '<div class="card-face card-front">';
+    html += '<div class="front-text">' + esc(card.front) + '</div>';
+    html += '<div class="front-hint">탭하여 뒤집기</div>';
+    html += '</div>';
+
+    // Back
+    html += '<div class="card-face card-back">';
+    html += buildBack(card);
+    html += '<div class="assess-row">';
+    html += '<button class="btn-assess green" data-assess="green" aria-label="알겠어요">알겠어요</button>';
+    html += '<button class="btn-assess yellow" data-assess="yellow" aria-label="애매해요">애매해요</button>';
+    html += '<button class="btn-assess red" data-assess="red" aria-label="모르겠어요">모르겠어요</button>';
+    html += '</div>';
+    html += '</div>';
+
+    html += '</div></div>';
+
+    // Nav
+    html += '<div class="nav-row">';
+    html += '<button class="btn-nav" data-dir="prev"' + (idx === 0 ? ' disabled' : '') + ' aria-label="이전 카드">&#x2190; 이전</button>';
+    html += '<div class="counter">' + (idx + 1) + ' / ' + total + '</div>';
+    html += '<button class="btn-nav" data-dir="next" aria-label="다음 카드">다음 &#x2192;</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+    bindEvents();
+  }
+
+  function navigate(dir) {
+    if (dir === 'prev' && idx > 0) { idx--; flipped = false; render(); }
+    else if (dir === 'next') {
+      if (idx < cards.length - 1) { idx++; flipped = false; render(); }
+      else { finished = true; render(); }
+    }
+  }
+
+  function assess(level) {
+    results[idx] = level;
+    // Auto-advance after assessment
+    setTimeout(function() { navigate('next'); }, 200);
+  }
+
+  function bindEvents() {
+    var container = app.querySelector('.card-container');
+    if (container) {
+      container.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-assess')) return;
+        flipped = !flipped;
+        container.classList.toggle('flipped', flipped);
+      });
+    }
+
+    app.querySelectorAll('.btn-assess').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        assess(btn.dataset.assess);
+      });
+    });
+
+    app.querySelectorAll('.btn-nav').forEach(function(btn) {
+      btn.addEventListener('click', function() { navigate(btn.dataset.dir); });
+    });
+
+    var shuffleBtn = app.querySelector('.btn-shuffle');
+    if (shuffleBtn) shuffleBtn.addEventListener('click', shuffle);
+
+    // Touch swipe
+    var area = app.querySelector('.card-area');
+    if (area) {
+      area.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+      }, { passive: true });
+
+      area.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].screenX - touchStartX;
+        var dy = e.changedTouches[0].screenY - touchStartY;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          if (dx < 0) navigate('next');
+          else navigate('prev');
+        }
+      }, { passive: true });
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (finished) return;
+    if (e.key === 'ArrowLeft') navigate('prev');
+    else if (e.key === 'ArrowRight') navigate('next');
+    else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      flipped = !flipped;
+      var c = app.querySelector('.card-container');
+      if (c) c.classList.toggle('flipped', flipped);
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

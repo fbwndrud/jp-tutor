@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일본어 학습 대시보드</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --text: #2c3e50;
+  --text-secondary: #6c757d;
+  --border: #e9ecef;
+  --badge-blue: #4A90D9;
+  --badge-green: #27AE60;
+  --badge-yellow: #F39C12;
+  --badge-red: #E74C3C;
+  --badge-gray: #BDC3C7;
+  --accent: #4A90D9;
+  --accent-light: #e8f0fe;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a2e;
+    --bg-card: #16213e;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b0;
+    --border: #2a2a4a;
+    --accent-light: #1a2a4a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-info { flex: 1; min-width: 200px; }
+
+.header-info h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.header-meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--badge-yellow);
+}
+
+.xp-section { margin-top: 12px; }
+
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.xp-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--badge-blue), var(--badge-green));
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+/* Badge Distribution */
+.dist-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.dist-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.dist-label {
+  width: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.dist-bar-wrap {
+  flex: 1;
+  height: 22px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+}
+
+.dist-seg {
+  height: 100%;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.dist-seg.blue { background: var(--badge-blue); }
+.dist-seg.green { background: var(--badge-green); }
+.dist-seg.yellow { background: var(--badge-yellow); }
+.dist-seg.red { background: var(--badge-red); }
+.dist-seg.gray { background: var(--badge-gray); }
+
+.dist-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  width: 30px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.badge-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* Review Alert */
+.review-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.review-content { flex: 1; }
+
+.review-count {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.review-overdue {
+  color: var(--badge-red);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Weak Points */
+.weak-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.weak-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.weak-item:last-child { border-bottom: none; }
+
+.weak-badge {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.weak-badge.red { background: var(--badge-red); }
+.weak-badge.yellow { background: var(--badge-yellow); }
+
+.weak-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.weak-cat {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.weak-notes {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Recent Sessions */
+.sessions-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.session-item:last-child { border-bottom: none; }
+
+.session-date {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.session-info { flex: 1; }
+
+.session-mode {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.session-topics {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.session-score {
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Recommendation */
+.rec-card {
+  background: var(--accent-light);
+  border: 1px solid var(--accent);
+}
+
+.rec-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.rec-reason {
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
+.rec-command {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 16px;
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const DATA = null;
+
+(function() {
+  const app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading" role="status" aria-label="로딩 중">데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  const u = DATA.user;
+  const s = DATA.summary;
+  const rq = DATA.reviewQueue;
+  const rs = DATA.recentSessions || [];
+  const rec = DATA.recommendation;
+
+  const xpInLevel = u.xp % 100;
+  const nextLevelXp = 100;
+
+  const modeLabels = {
+    grammar_drill: '문법 드릴',
+    vocab_quiz: '어휘 퀴즈',
+    kanji_drill: '한자 드릴',
+    reading: '독해',
+    writing: '작문',
+    conversation: '회화',
+    translate: '번역',
+    grammar: '문법',
+    culture: '문화',
+    review: '복습',
+    daily: '데일리'
+  };
+
+  function modeName(m) { return modeLabels[m] || m; }
+
+  function scoreColor(correct, total) {
+    if (total === 0) return 'var(--text-secondary)';
+    const r = correct / total;
+    if (r >= 0.8) return 'var(--badge-blue)';
+    if (r >= 0.6) return 'var(--badge-green)';
+    if (r >= 0.4) return 'var(--badge-yellow)';
+    return 'var(--badge-red)';
+  }
+
+  function esc(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function buildDistBar(cat) {
+    const total = cat.total || 1;
+    const segs = ['blue', 'green', 'yellow', 'red'].map(c => {
+      const v = cat[c] || 0;
+      const pct = (v / total * 100).toFixed(1);
+      return v > 0 ? '<div class="dist-seg ' + c + '" style="width:' + pct + '%" title="' + v + '"></div>' : '';
+    }).join('');
+    return '<div class="dist-bar-wrap">' + segs + '</div>';
+  }
+
+  // Header
+  let html = '<div class="card header">';
+  html += '<div class="level-badge" aria-label="레벨 ' + esc(String(u.playerLevel)) + '">Lv.' + esc(String(u.playerLevel)) + '</div>';
+  html += '<div class="header-info">';
+  html += '<h1>' + esc(u.level) + ' 일본어 학습</h1>';
+  html += '<div class="header-meta">';
+  html += esc(u.profile === 'jlpt' ? 'JLPT' : u.profile === 'business' ? '비즈니스' : '교재') + ' | ';
+  html += '총 ' + esc(String(u.totalSessions)) + '회 세션 | ';
+  html += esc(u.startedAt) + '부터</div>';
+  html += '</div>';
+  if (u.streak && u.streak.current > 0) {
+    html += '<div class="streak-badge" aria-label="연속 ' + u.streak.current + '일">';
+    html += '<span style="font-size:1.4rem">&#x1F525;</span> ' + u.streak.current + '일';
+    if (u.streak.best) html += ' <span style="font-size:0.75rem;color:var(--text-secondary)">(최고 ' + u.streak.best + '일)</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // XP Bar
+  html += '<div class="card"><div class="xp-section">';
+  html += '<div class="xp-label"><span>XP: ' + u.xp + '</span><span>다음 레벨까지 ' + (nextLevelXp - xpInLevel) + ' XP</span></div>';
+  html += '<div class="xp-bar"><div class="xp-fill" style="width:' + (xpInLevel / nextLevelXp * 100) + '%"></div></div>';
+  html += '</div></div>';
+
+  // Badge Distribution
+  html += '<div class="card">';
+  html += '<div class="dist-title" id="badge-dist">배지 분포</div>';
+  var cats = [
+    { label: '어휘', data: s.vocabulary },
+    { label: '문법', data: s.grammar },
+    { label: '한자', data: s.kanji }
+  ];
+  cats.forEach(function(c) {
+    html += '<div class="dist-row">';
+    html += '<div class="dist-label">' + esc(c.label) + '</div>';
+    html += buildDistBar(c.data);
+    html += '<div class="dist-count">' + c.data.total + '</div>';
+    html += '</div>';
+  });
+  html += '<div class="badge-legend" aria-label="범례">';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-blue)"></div>마스터</div>';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-green)"></div>숙련</div>';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-yellow)"></div>학습중</div>';
+  html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-red)"></div>보강 필요</div>';
+  html += '</div></div>';
+
+  // Review Alert
+  if (rq) {
+    html += '<div class="card"><div class="review-alert">';
+    html += '<div class="review-icon" aria-hidden="true">&#x23F0;</div>';
+    html += '<div class="review-content">';
+    html += '<div>오늘 복습: <span class="review-count">' + rq.today + '개</span></div>';
+    html += '<div style="font-size:0.85rem;color:var(--text-secondary)">이번 주: ' + rq.thisWeek + '개</div>';
+    if (rq.overdue > 0) {
+      html += '<div class="review-overdue">&#x26A0; 밀린 복습: ' + rq.overdue + '개</div>';
+    }
+    html += '</div></div></div>';
+  }
+
+  // Weak Points
+  var weakPoints = [];
+  cats.forEach(function(c) {
+    if (c.data.weakPoints) {
+      c.data.weakPoints.forEach(function(wp) {
+        weakPoints.push({ cat: c.label, name: wp.name, badge: wp.badge, notes: wp.errorNotes || [] });
+      });
+    }
+  });
+
+  if (weakPoints.length > 0) {
+    html += '<div class="card">';
+    html += '<div class="weak-title">약점 항목</div>';
+    weakPoints.forEach(function(wp) {
+      html += '<div class="weak-item">';
+      html += '<div class="weak-badge ' + esc(wp.badge) + '"></div>';
+      html += '<div>';
+      html += '<div class="weak-name">' + esc(wp.name) + ' <span class="weak-cat">' + esc(wp.cat) + '</span></div>';
+      if (wp.notes.length > 0) {
+        html += '<div class="weak-notes">' + wp.notes.map(esc).join(', ') + '</div>';
+      }
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // Recent Sessions
+  if (rs.length > 0) {
+    html += '<div class="card">';
+    html += '<div class="sessions-title">최근 세션</div>';
+    rs.slice(0, 5).forEach(function(ses) {
+      html += '<div class="session-item">';
+      html += '<div class="session-date">' + esc(ses.date) + '</div>';
+      html += '<div class="session-info">';
+      html += '<div class="session-mode">' + esc(modeName(ses.mode)) + '</div>';
+      if (ses.topics && ses.topics.length) {
+        html += '<div class="session-topics">' + ses.topics.map(esc).join(', ') + '</div>';
+      }
+      html += '</div>';
+      if (ses.questions > 0) {
+        html += '<div class="session-score" style="color:' + scoreColor(ses.correct, ses.questions) + '">' + ses.correct + '/' + ses.questions + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Recommendation
+  if (rec) {
+    html += '<div class="card rec-card">';
+    html += '<div class="rec-header">&#x1F4A1; 추천</div>';
+    html += '<div class="rec-reason">' + esc(rec.reason) + '</div>';
+    if (rec.command) {
+      html += '<div class="rec-command">' + esc(rec.command) + '</div>';
+    }
+    html += '</div>';
+  }
+
+  app.innerHTML = html;
+})();
+</script>
+</body>
+</html>
