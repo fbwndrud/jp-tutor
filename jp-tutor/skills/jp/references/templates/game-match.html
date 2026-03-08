@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>매칭 카드 게임</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+}
+
+/* Top bar */
+.topbar {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.topbar-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.topbar-info strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.round-info {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 600;
+  background: var(--bg-sunken);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+}
+
+/* Timer bar */
+.timer-wrap {
+  width: 100%;
+  max-width: 600px;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: 4px;
+  transition: width 0.2s linear;
+}
+
+.timer-fill.warning {
+  background: linear-gradient(90deg, var(--peach), var(--coral));
+}
+
+.timer-fill.danger {
+  background: var(--coral);
+  animation: timerPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Stats row */
+.stats-row {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+}
+
+.stats-row .time-display {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-row .miss-display {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.miss-heart {
+  font-size: 1rem;
+  transition: opacity 0.3s;
+}
+
+.miss-heart.used {
+  opacity: 0.2;
+  filter: grayscale(1);
+}
+
+.miss-text {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.match-count {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Card grid */
+.card-grid {
+  width: 100%;
+  max-width: 600px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Match card */
+.match-card {
+  aspect-ratio: 1 / 1.2;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.match-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.match-card.flipped .match-card-inner {
+  transform: rotateY(180deg);
+}
+
+.match-card.matched .match-card-inner {
+  animation: matchOut 0.4s ease forwards;
+}
+
+@keyframes matchOut {
+  0% { opacity: 1; transform: rotateY(180deg) scale(1); }
+  50% { opacity: 0.8; transform: rotateY(180deg) scale(1.05); }
+  100% { opacity: 0; transform: rotateY(180deg) scale(0.8); }
+}
+
+.match-card.matched {
+  pointer-events: none;
+}
+
+.match-card.selected .match-card-inner {
+  box-shadow: 0 0 0 3px var(--accent), var(--shadow-lg);
+  border-radius: var(--radius);
+}
+
+.match-card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+}
+
+/* Card back (face-down) */
+.match-card-back {
+  background: linear-gradient(135deg, var(--accent-light), var(--bg-card-back));
+  position: relative;
+  overflow: hidden;
+}
+
+.match-card-back::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  opacity: 0.5;
+}
+
+.match-card-back::after {
+  content: '\273F';
+  font-size: 1.8rem;
+  color: var(--accent);
+  opacity: 0.25;
+}
+
+/* Card front (face-up) */
+.match-card-front {
+  background: var(--bg-elevated);
+  transform: rotateY(180deg);
+  flex-direction: column;
+  padding: 10px 8px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.match-card-front .card-text {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.match-card-front .card-type {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.match-card-front.type-front {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.match-card-front.type-front .card-type {
+  color: var(--accent);
+}
+
+.match-card-front.type-back {
+  border-color: var(--pink);
+  border-width: 2px;
+}
+
+.match-card-front.type-back .card-type {
+  color: var(--pink);
+}
+
+.match-card-front.type-hidden .card-text {
+  color: var(--text-muted);
+  font-size: 2rem;
+}
+
+/* Shuffle animation */
+.match-card.shuffling {
+  animation: shuffleCard 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes shuffleCard {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Mismatch shake */
+.match-card.mismatch .match-card-inner {
+  animation: mismatchShake 0.4s ease;
+}
+
+@keyframes mismatchShake {
+  0%, 100% { transform: rotateY(180deg) translateX(0); }
+  20% { transform: rotateY(180deg) translateX(-6px); }
+  40% { transform: rotateY(180deg) translateX(6px); }
+  60% { transform: rotateY(180deg) translateX(-4px); }
+  80% { transform: rotateY(180deg) translateX(4px); }
+}
+
+/* Preview overlay */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.preview-msg {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  padding: 24px 36px;
+  box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--border);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.preview-msg .countdown {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-top: 8px;
+}
+
+/* Results */
+.results {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 36px 28px;
+  text-align: center;
+  border: 1.5px solid var(--border);
+}
+
+.results h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.results .star-effect {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  animation: starBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes starBounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+
+.result-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+}
+
+.result-stat .stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.result-stat .stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-stat .stat-value.perfect {
+  color: var(--badge-green);
+}
+
+.btn-restart {
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 13px 32px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 14px rgba(155,127,212,0.25);
+}
+
+.btn-restart:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(155,127,212,0.3); }
+
+/* Game over overlay */
+.gameover-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body > * { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+@media (max-width: 520px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  .match-card-front .card-text {
+    font-size: 1.2rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading" role="status" aria-label="로딩 중">데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  // --- Game State ---
+  var pairs = DATA.pairs || [];
+  var timeLimit = DATA.timeLimit || 60;
+  var maxMisses = DATA.maxMisses != null ? DATA.maxMisses : -1;
+  var showPreview = DATA.showPreview !== false;
+  var previewTime = DATA.previewTime || 1;
+  var shuffleAfter = DATA.shuffleAfter != null ? DATA.shuffleAfter : -1;
+  var hideRandomFront = DATA.hideRandomFront || false;
+  var roundNumber = DATA.roundNumber || 1;
+  var totalRounds = DATA.totalRounds || 1;
+  var tierName = DATA.tierName || '';
+
+  var cards = [];        // { id, pairIdx, side:'front'|'back', text, concept, hidden }
+  var flippedCards = [];  // indices of currently flipped (max 2)
+  var matchedPairs = 0;
+  var totalPairs = pairs.length;
+  var misses = 0;
+  var timeRemaining = timeLimit;
+  var timerInterval = null;
+  var gameStarted = false;
+  var gameOver = false;
+  var selectedIdx = -1;  // keyboard navigation
+  var lockBoard = false;
+  var startTime = 0;
+  var endTime = 0;
+
+  // Build card array: 2 cards per pair
+  function buildCards() {
+    cards = [];
+    for (var i = 0; i < pairs.length; i++) {
+      var p = pairs[i];
+      cards.push({
+        id: i * 2,
+        pairIdx: i,
+        side: 'front',
+        text: p.front,
+        concept: p.concept || p.front,
+        hidden: false,
+        flipped: false,
+        matched: false
+      });
+      cards.push({
+        id: i * 2 + 1,
+        pairIdx: i,
+        side: 'back',
+        text: p.back,
+        concept: p.concept || p.front,
+        hidden: false,
+        flipped: false,
+        matched: false
+      });
+    }
+    // hideRandomFront: mark some front cards as hidden
+    if (hideRandomFront) {
+      var frontCards = cards.filter(function(c) { return c.side === 'front'; });
+      var count = Math.max(1, Math.floor(frontCards.length * 0.4));
+      shuffleArray(frontCards);
+      for (var i = 0; i < count && i < frontCards.length; i++) {
+        frontCards[i].hidden = true;
+      }
+    }
+    shuffleArray(cards);
+  }
+
+  function shuffleArray(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function esc(str) {
+    if (str == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  function formatTime(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // --- Timer ---
+  function startTimer() {
+    startTime = Date.now();
+    gameStarted = true;
+    timerInterval = setInterval(function() {
+      var elapsed = Math.floor((Date.now() - startTime) / 1000);
+      timeRemaining = Math.max(0, timeLimit - elapsed);
+      updateTimerUI();
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        endGame(false);
+      }
+    }, 200);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    endTime = Date.now();
+  }
+
+  function updateTimerUI() {
+    var pct = (timeRemaining / timeLimit) * 100;
+    var fill = document.getElementById('timer-fill');
+    var timeDisp = document.getElementById('time-display');
+    if (fill) {
+      fill.style.width = pct + '%';
+      fill.className = 'timer-fill';
+      if (pct <= 15) fill.classList.add('danger');
+      else if (pct <= 30) fill.classList.add('warning');
+    }
+    if (timeDisp) timeDisp.textContent = formatTime(timeRemaining);
+  }
+
+  // --- Game Logic ---
+  function flipCard(idx) {
+    if (lockBoard || gameOver) return;
+    var card = cards[idx];
+    if (!card || card.flipped || card.matched) return;
+    if (flippedCards.length >= 2) return;
+
+    card.flipped = true;
+    flippedCards.push(idx);
+    renderCard(idx);
+
+    if (flippedCards.length === 2) {
+      lockBoard = true;
+      var c1 = cards[flippedCards[0]];
+      var c2 = cards[flippedCards[1]];
+
+      if (c1.pairIdx === c2.pairIdx && c1.side !== c2.side) {
+        // Match!
+        setTimeout(function() {
+          c1.matched = true;
+          c2.matched = true;
+          matchedPairs++;
+          renderCard(flippedCards[0]);
+          renderCard(flippedCards[1]);
+          updateMatchCount();
+          flippedCards = [];
+          lockBoard = false;
+
+          // Check shuffleAfter
+          if (shuffleAfter > 0 && matchedPairs > 0 && matchedPairs < totalPairs && matchedPairs % shuffleAfter === 0) {
+            shuffleRemaining();
+          }
+
+          // Check win
+          if (matchedPairs >= totalPairs) {
+            endGame(true);
+          }
+        }, 500);
+      } else {
+        // Mismatch
+        misses++;
+        updateMissUI();
+
+        // Add mismatch animation
+        var el1 = document.querySelector('[data-idx="' + flippedCards[0] + '"]');
+        var el2 = document.querySelector('[data-idx="' + flippedCards[1] + '"]');
+        if (el1) el1.classList.add('mismatch');
+        if (el2) el2.classList.add('mismatch');
+
+        setTimeout(function() {
+          c1.flipped = false;
+          c2.flipped = false;
+          if (el1) el1.classList.remove('mismatch');
+          if (el2) el2.classList.remove('mismatch');
+          renderCard(flippedCards[0]);
+          renderCard(flippedCards[1]);
+          flippedCards = [];
+          lockBoard = false;
+
+          // Check maxMisses
+          if (maxMisses > 0 && misses >= maxMisses) {
+            endGame(false);
+          }
+        }, 800);
+      }
+    }
+  }
+
+  function shuffleRemaining() {
+    lockBoard = true;
+    var remaining = [];
+    var remainingIdxs = [];
+    for (var i = 0; i < cards.length; i++) {
+      if (!cards[i].matched) {
+        remaining.push(cards[i]);
+        remainingIdxs.push(i);
+      }
+    }
+    shuffleArray(remaining);
+    for (var i = 0; i < remainingIdxs.length; i++) {
+      // Flip remaining cards face-down first
+      remaining[i].flipped = false;
+      cards[remainingIdxs[i]] = remaining[i];
+    }
+    // Animate
+    var gridCards = document.querySelectorAll('.match-card');
+    gridCards.forEach(function(el) {
+      var idx = parseInt(el.dataset.idx);
+      if (!cards[idx].matched) {
+        el.classList.add('shuffling');
+      }
+    });
+    setTimeout(function() {
+      renderGrid();
+      lockBoard = false;
+    }, 500);
+  }
+
+  function endGame(won) {
+    gameOver = true;
+    stopTimer();
+    var elapsed = Math.floor((endTime - startTime) / 1000);
+    setTimeout(function() {
+      renderResult(won, elapsed);
+    }, won ? 600 : 200);
+  }
+
+  // --- Rendering ---
+  function render() {
+    var html = '';
+
+    // Top bar
+    html += '<div class="topbar">';
+    html += '<div class="topbar-info"><strong>' + esc(tierName) + '</strong> 매칭 카드</div>';
+    html += '<div class="round-info">라운드 ' + roundNumber + '/' + totalRounds + '</div>';
+    html += '</div>';
+
+    // Timer
+    html += '<div class="timer-wrap"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>';
+
+    // Stats
+    html += '<div class="stats-row">';
+    html += '<span class="time-display" id="time-display">' + formatTime(timeRemaining) + '</span>';
+    html += '<span class="match-count" id="match-count">' + matchedPairs + ' / ' + totalPairs + ' 매칭</span>';
+    html += '<span class="miss-display" id="miss-display">' + buildMissHTML() + '</span>';
+    html += '</div>';
+
+    // Card grid
+    html += '<div class="card-grid" id="card-grid">';
+    for (var i = 0; i < cards.length; i++) {
+      html += buildCardHTML(i);
+    }
+    html += '</div>';
+
+    app.innerHTML = html;
+    bindGridEvents();
+  }
+
+  function buildMissHTML() {
+    if (maxMisses <= 0) {
+      return '<span class="miss-text">미스 ' + misses + '</span>';
+    }
+    var html = '';
+    for (var i = 0; i < maxMisses; i++) {
+      html += '<span class="miss-heart' + (i < misses ? ' used' : '') + '">\u2764\uFE0F</span>';
+    }
+    return html;
+  }
+
+  function updateMissUI() {
+    var el = document.getElementById('miss-display');
+    if (el) el.innerHTML = buildMissHTML();
+  }
+
+  function updateMatchCount() {
+    var el = document.getElementById('match-count');
+    if (el) el.textContent = matchedPairs + ' / ' + totalPairs + ' 매칭';
+  }
+
+  function buildCardHTML(i) {
+    var card = cards[i];
+    var classes = 'match-card';
+    if (card.flipped) classes += ' flipped';
+    if (card.matched) classes += ' matched';
+    if (i === selectedIdx) classes += ' selected';
+
+    var typeClass = card.hidden ? 'type-hidden' : ('type-' + card.side);
+    var displayText = card.hidden ? '?' : esc(card.text);
+
+    var html = '<div class="' + classes + '" data-idx="' + i + '" role="button" tabindex="-1" aria-label="카드 ' + (i + 1) + '">';
+    html += '<div class="match-card-inner">';
+    html += '<div class="match-card-face match-card-back"></div>';
+    html += '<div class="match-card-face match-card-front ' + typeClass + '">';
+    html += '<span class="card-text">' + displayText + '</span>';
+    if (!card.hidden) {
+      html += '<span class="card-type">' + (card.side === 'front' ? 'JP' : 'KR') + '</span>';
+    }
+    html += '</div>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderCard(i) {
+    var el = document.querySelector('[data-idx="' + i + '"]');
+    if (!el) return;
+    var card = cards[i];
+    el.className = 'match-card';
+    if (card.flipped) el.classList.add('flipped');
+    if (card.matched) el.classList.add('matched');
+    if (i === selectedIdx) el.classList.add('selected');
+  }
+
+  function renderGrid() {
+    var grid = document.getElementById('card-grid');
+    if (!grid) return;
+    var html = '';
+    for (var i = 0; i < cards.length; i++) {
+      html += buildCardHTML(i);
+    }
+    grid.innerHTML = html;
+    bindGridEvents();
+  }
+
+  function bindGridEvents() {
+    var cardEls = document.querySelectorAll('.match-card');
+    cardEls.forEach(function(el) {
+      el.addEventListener('click', function() {
+        var idx = parseInt(el.dataset.idx);
+        selectedIdx = idx;
+        flipCard(idx);
+      });
+    });
+  }
+
+  // --- Preview Phase ---
+  function startPreview() {
+    if (!showPreview) {
+      startTimer();
+      render();
+      return;
+    }
+
+    // Flip all cards face-up initially
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].flipped = true;
+    }
+    render();
+    lockBoard = true;
+
+    var remaining = previewTime;
+    var overlay = document.createElement('div');
+    overlay.className = 'preview-overlay';
+    overlay.innerHTML = '<div class="preview-msg">카드를 기억하세요!<span class="countdown">' + remaining + '</span></div>';
+    document.body.appendChild(overlay);
+
+    var countdownEl = overlay.querySelector('.countdown');
+    var previewInterval = setInterval(function() {
+      remaining--;
+      if (countdownEl) countdownEl.textContent = remaining > 0 ? remaining : '';
+      if (remaining <= 0) {
+        clearInterval(previewInterval);
+        document.body.removeChild(overlay);
+        // Flip all back
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].flipped = false;
+        }
+        renderGrid();
+        lockBoard = false;
+        startTimer();
+      }
+    }, 1000);
+  }
+
+  // --- Result Screen ---
+  function renderResult(won, elapsed) {
+    var isPerfect = won && misses === 0;
+    var html = '<div class="results" role="region" aria-label="결과">';
+
+    if (isPerfect) {
+      html += '<div class="star-effect">\u2B50\uFE0F \u2728 \u2B50\uFE0F</div>';
+      html += '<h2>Perfect!</h2>';
+    } else if (won) {
+      html += '<h2>클리어!</h2>';
+    } else {
+      html += '<h2>게임 오버</h2>';
+    }
+
+    html += '<div class="result-stats">';
+
+    html += '<div class="result-stat">';
+    html += '<span class="stat-label">매칭 성공</span>';
+    html += '<span class="stat-value' + (matchedPairs === totalPairs ? ' perfect' : '') + '">' + matchedPairs + ' / ' + totalPairs + '</span>';
+    html += '</div>';
+
+    html += '<div class="result-stat">';
+    html += '<span class="stat-label">소요 시간</span>';
+    html += '<span class="stat-value">' + formatTime(elapsed) + '</span>';
+    html += '</div>';
+
+    html += '<div class="result-stat">';
+    html += '<span class="stat-label">미스 횟수</span>';
+    html += '<span class="stat-value' + (misses === 0 ? ' perfect' : '') + '">' + misses + '</span>';
+    html += '</div>';
+
+    html += '</div>';
+
+    html += '<button class="btn-restart" id="btn-restart" aria-label="다시 하기">다시 하기</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+
+    document.getElementById('btn-restart').addEventListener('click', function() {
+      resetGame();
+    });
+  }
+
+  function resetGame() {
+    flippedCards = [];
+    matchedPairs = 0;
+    misses = 0;
+    timeRemaining = timeLimit;
+    gameStarted = false;
+    gameOver = false;
+    selectedIdx = -1;
+    lockBoard = false;
+    if (timerInterval) clearInterval(timerInterval);
+    buildCards();
+    startPreview();
+  }
+
+  // --- Keyboard Navigation ---
+  document.addEventListener('keydown', function(e) {
+    if (gameOver || lockBoard) return;
+
+    var cols = getGridCols();
+    var total = cards.length;
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      selectedIdx = findNextSelectable(selectedIdx, 1, total);
+      updateSelection();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      selectedIdx = findNextSelectable(selectedIdx, -1, total);
+      updateSelection();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIdx = findNextSelectable(selectedIdx, cols, total);
+      updateSelection();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIdx = findNextSelectable(selectedIdx, -cols, total);
+      updateSelection();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (selectedIdx >= 0 && selectedIdx < total) {
+        flipCard(selectedIdx);
+      }
+    }
+  });
+
+  function findNextSelectable(current, step, total) {
+    if (current < 0) return 0;
+    var next = current + step;
+    if (next < 0) next = 0;
+    if (next >= total) next = total - 1;
+    return next;
+  }
+
+  function getGridCols() {
+    var grid = document.getElementById('card-grid');
+    if (!grid || !grid.children.length) return 4;
+    var firstTop = grid.children[0].getBoundingClientRect().top;
+    var cols = 0;
+    for (var i = 0; i < grid.children.length; i++) {
+      if (grid.children[i].getBoundingClientRect().top === firstTop) cols++;
+      else break;
+    }
+    return cols || 4;
+  }
+
+  function updateSelection() {
+    document.querySelectorAll('.match-card').forEach(function(el) {
+      var idx = parseInt(el.dataset.idx);
+      el.classList.toggle('selected', idx === selectedIdx);
+    });
+  }
+
+  // --- Init ---
+  buildCards();
+  startPreview();
+})();
+</script>
+</body>
+</html>
