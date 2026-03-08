@@ -51,6 +51,14 @@ Y를 선택하면:
 - `templates/flashcard.html` 템플릿을 참조하여 생성합니다.
 - 파일은 `jp-data/flashcards/kanji-{날짜}-{그룹}.html`에 저장합니다.
 
+## 워밍업 미니게임
+
+퀴즈 전에 학습한 한자로 **워밍업 미니게임 1판**을 진행합니다:
+- 부수 조립 게임 (radical_assembly) 또는 매칭카드 (한자↔읽기/의미)
+- 게임 티어는 1(입문)로 고정
+- "게임으로 먼저 연습해볼까요?" 안내 후 진행
+- 게임 결과는 SRS에 반영하지 않음 (워밍업 목적)
+
 ## 확인 퀴즈
 
 `skills/jp/references/quiz-rules.md` 규칙을 따릅니다.
