@@ -337,6 +337,79 @@ body {
 
 .btn-restart:hover { opacity: 0.85; }
 
+/* TTS Controls */
+.tts-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.tts-bar select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  max-width: 160px;
+}
+
+.tts-bar select:focus { border-color: var(--accent); }
+
+.tts-bar input[type="range"] {
+  width: 80px;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+
+.tts-bar input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.tts-bar .speed-val {
+  font-weight: 600;
+  min-width: 28px;
+}
+
+.btn-speak {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.btn-speak:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-speak.speaking { background: var(--accent); color: #fff; border-color: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
 @media (max-width: 520px) {
   .front-text { font-size: 2.2rem; }
   .card-face { min-height: 280px; }
@@ -365,6 +438,49 @@ const DATA = null;
   var finished = false;
   var touchStartX = 0;
   var touchStartY = 0;
+
+  // TTS
+  var hasTTS = 'speechSynthesis' in window;
+  var jaVoices = [];
+  var selectedVoiceIdx = 0;
+  var ttsRate = DATA.ttsRate || 0.8;
+  var isSpeaking = false;
+
+  function loadVoices() {
+    if (!hasTTS) return;
+    var all = speechSynthesis.getVoices();
+    jaVoices = all.filter(function(v) { return v.lang && v.lang.startsWith('ja'); });
+    if (jaVoices.length === 0) {
+      jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
+    }
+    render();
+  }
+
+  function speakText(text) {
+    if (!hasTTS || !text) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = ttsRate;
+    if (jaVoices.length > 0) u.voice = jaVoices[selectedVoiceIdx];
+    isSpeaking = true;
+    var btn = document.getElementById('btn-speak');
+    if (btn) btn.classList.add('speaking');
+    u.onend = function() {
+      isSpeaking = false;
+      var b = document.getElementById('btn-speak');
+      if (b) b.classList.remove('speaking');
+    };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  }
+
+  if (hasTTS) {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    }
+    loadVoices();
+  }
 
   for (var i = 0; i < cards.length; i++) results.push(null);
 
@@ -503,6 +619,25 @@ const DATA = null;
     html += '<button class="btn-shuffle" aria-label="순서 섞기">&#x1F500; 섞기</button>';
     html += '</div>';
 
+    // TTS controls
+    if (hasTTS) {
+      html += '<div class="tts-bar">';
+      if (jaVoices.length > 1) {
+        html += '<select id="voice-sel">';
+        jaVoices.forEach(function(v, i) {
+          var label = v.name.replace('Google ', '').replace('Microsoft ', 'MS ');
+          html += '<option value="' + i + '"' + (i === selectedVoiceIdx ? ' selected' : '') + '>' + esc(label) + '</option>';
+        });
+        html += '</select>';
+      } else if (jaVoices.length === 1) {
+        html += '<span>' + esc(jaVoices[0].name.replace('Google ', '')) + '</span>';
+      }
+      html += '<span style="margin-left:auto">Speed</span>';
+      html += '<input type="range" id="tts-speed" min="0.3" max="1.5" step="0.1" value="' + ttsRate + '">';
+      html += '<span class="speed-val" id="tts-speed-val">' + ttsRate.toFixed(1) + 'x</span>';
+      html += '</div>';
+    }
+
     // Progress
     html += '<div class="progress-wrap" role="progressbar" aria-valuenow="' + (idx + 1) + '" aria-valuemin="1" aria-valuemax="' + total + '">';
     html += '<div class="progress-fill" style="width:' + pct + '%"></div></div>';
@@ -514,6 +649,9 @@ const DATA = null;
     // Front
     html += '<div class="card-face card-front">';
     html += '<div class="front-text">' + esc(card.front) + '</div>';
+    if (hasTTS) {
+      html += '<button class="btn-speak' + (isSpeaking ? ' speaking' : '') + '" id="btn-speak" aria-label="발음 듣기" title="발음 듣기">\u{1F50A}</button>';
+    }
     html += '<div class="front-hint">탭하여 뒤집기</div>';
     html += '</div>';
 
@@ -577,6 +715,22 @@ const DATA = null;
 
     var shuffleBtn = app.querySelector('.btn-shuffle');
     if (shuffleBtn) shuffleBtn.addEventListener('click', shuffle);
+
+    // TTS events
+    var btnSpeak = document.getElementById('btn-speak');
+    if (btnSpeak) btnSpeak.addEventListener('click', function(e) {
+      e.stopPropagation();
+      speakText(cards[idx].front);
+    });
+    var voiceSel = document.getElementById('voice-sel');
+    if (voiceSel) voiceSel.addEventListener('change', function() {
+      selectedVoiceIdx = parseInt(voiceSel.value);
+    });
+    var ttsSpeed = document.getElementById('tts-speed');
+    if (ttsSpeed) ttsSpeed.addEventListener('input', function() {
+      ttsRate = parseFloat(ttsSpeed.value);
+      document.getElementById('tts-speed-val').textContent = ttsRate.toFixed(1) + 'x';
+    });
 
     // Touch swipe
     var area = app.querySelector('.card-area');
