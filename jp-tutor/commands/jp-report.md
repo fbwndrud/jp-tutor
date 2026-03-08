@@ -35,6 +35,7 @@ progress.json의 session_log에서 해당 기간의 세션을 필터링합니다
 - 전체 정답률: {rate}%
 
 카테고리별 정답률
+- 가나: {kana_rate}% ({kana_questions}문제) (Pre-N5인 경우)
 - 어휘: {vocab_rate}% ({vocab_questions}문제)
 - 문법: {grammar_rate}% ({grammar_questions}문제)
 - 한자: {kanji_rate}% ({kanji_questions}문제)

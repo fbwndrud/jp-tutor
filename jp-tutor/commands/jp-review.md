@@ -16,7 +16,7 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 전체]"
 
 ## 복습 대상 수집
 
-오늘 날짜를 기준으로, progress.json의 모든 카테고리(vocab, grammar, kanji)에서 복습 대상을 수집합니다:
+오늘 날짜를 기준으로, progress.json의 모든 카테고리(kana, vocab, grammar, kanji)에서 복습 대상을 수집합니다:
 
 - 조건: `nextReview <= 오늘 날짜`
 - 인자로 특정 카테고리가 지정되면 해당 카테고리만 필터링
@@ -62,6 +62,7 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 전체]"
 
 각 문제:
 1. 카테고리에 맞는 퀴즈 형식으로 출제
+   - kana: 문자 인식, 발음→문자, 혼동 쌍 구별 (`exercise-types-kana.md` 참조)
    - vocab: 의미, 읽기, 용례 중 랜덤
    - grammar: 빈칸 채우기, 문장 변환, 올바른 형태 선택
    - kanji: 읽기(음독/훈독), 의미, 쓰기

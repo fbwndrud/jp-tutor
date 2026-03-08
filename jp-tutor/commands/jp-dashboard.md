@@ -18,7 +18,7 @@ progress.json에서 다음을 계산합니다:
 
 ### 배지 분포
 
-각 카테고리(vocab, grammar, kanji)의 concepts를 순회하여 배지별 개수를 집계합니다:
+각 카테고리(kana, vocab, grammar, kanji)의 concepts를 순회하여 배지별 개수를 집계합니다:
 
 | 비율 (correct/attempts) | 배지 |
 |--------------------------|------|
@@ -51,6 +51,11 @@ progress.json에서 다음을 계산합니다:
      xp: <XP>,
      playerLevel: <플레이어레벨>,
      streak: { current: <현재>, best: <최고>, lastDate: "<날짜>" },
+     kana: {
+       hiraStage: N, kataStage: N,
+       hira: { blue: N, green: N, yellow: N, red: N, untested: N },
+       kata: { blue: N, green: N, yellow: N, red: N, untested: N }
+     },
      badges: {
        vocab: { blue: N, green: N, yellow: N, red: N, untested: N },
        grammar: { blue: N, green: N, yellow: N, red: N, untested: N },
@@ -83,6 +88,7 @@ HTML 생성을 건너뜁니다.
 일일 목표: {completed}/{target} 문제
 주간 목표: {completed_days}/{target_days}일
 
+가나: 히라가나 Stage {hiraStage}/7 | 카타카나 Stage {kataStage}/4 (Pre-N5인 경우)
 어휘: 파랑x{blue} 초록x{green} 노랑x{yellow} 빨강x{red} 미학습x{untested}
 문법: 파랑x{blue} 초록x{green} 노랑x{yellow} 빨강x{red} 미학습x{untested}
 한자: 파랑x{blue} 초록x{green} 노랑x{yellow} 빨강x{red} 미학습x{untested}

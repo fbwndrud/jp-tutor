@@ -22,6 +22,7 @@ description: |
 
 1. **명시적 명령어**: `/jp:vocab`, `/jp:grammar` 등 → 해당 모드 직접 실행
 2. **자연어 요청**: 의도를 파악하여 자동 라우팅
+   - "히라가나", "카타카나", "가나", "50음도" → kana 모드
    - "단어 외우자", "어휘 퀴즈" → vocab 모드
    - "문법 연습", "~てform 알려줘" → grammar 모드
    - "한자 공부" → kanji 모드
@@ -44,6 +45,7 @@ description: |
 2. 파일이 없으면 초기 설정을 시작합니다:
    - 학습 프로필 선택: `jlpt` / `business` / `textbook`
    - JLPT: 목표 레벨 선택 (N5~N1), 현재 실력 자가 진단
+   - **히라가나/카타카나를 모르는 완전 초보자**: Pre-N5 레벨로 설정 → 가나 학습부터 시작
    - Business: 현재 일본어 레벨, 주요 업무 분야
    - Textbook: 사용 중인 교재 정보
 3. 초기 `progress.json`을 생성합니다.
@@ -67,6 +69,13 @@ description: |
     "weekly_goal": { "target_days": 5, "completed_days": 0, "week_start": null }
   },
   "session_log": [],
+  "kana": {
+    "hiraStage": 1,
+    "kataStage": 0,
+    "concepts": {
+      "あ_hira": { "correct": 3, "attempts": 4, "lastReview": "2026-03-08", "nextReview": "2026-03-11" }
+    }
+  },
   "vocab": {
     "concepts": {
       "食べる": { "correct": 3, "attempts": 4, "lastReview": "2026-03-08", "nextReview": "2026-03-11" }
@@ -125,6 +134,13 @@ description: |
 
 ## 프로필별 라우팅
 
+### Pre-N5 (가나 학습)
+- 히라가나/카타카나를 처음부터 학습하는 완전 초보자용
+- 커리큘럼 참조: `skills/jp/references/curricula/kana.md`
+- 연습 유형 참조: `skills/jp/references/exercise-types-kana.md`
+- 히라가나 7단계 + 카타카나 4단계 (카타카나는 히라가나 Stage 5부터 병행)
+- 졸업 조건: 히라가나 95% + 카타카나 90% 정확도 → N5로 자동 승급
+
 ### JLPT 모드 (jlpt)
 - 목표 레벨의 커리큘럼에 따라 단어/문법/한자를 체계적으로 학습
 - 커리큘럼 참조: `skills/jp/references/curricula/japanese-jlpt.md`
@@ -176,7 +192,9 @@ description: |
 
 - **퀴즈 생성 시**: `skills/jp/references/quiz-rules.md` 를 읽고 규칙을 따릅니다.
 - **연습 모드 설계 시**: `skills/jp/references/exercise-types.md` 를 읽고 형식을 따릅니다.
+- **가나 연습 시**: `skills/jp/references/exercise-types-kana.md` 를 읽고 형식을 따릅니다.
 - **채점 시**: `skills/jp/references/grading-rubrics.md` 를 읽고 기준을 적용합니다.
+- **가나 커리큘럼**: `skills/jp/references/curricula/kana.md`
 - **JLPT 커리큘럼**: `skills/jp/references/curricula/japanese-jlpt.md`
 - **비즈니스 커리큘럼**: `skills/jp/references/curricula/business-japanese.md`
 
@@ -243,6 +261,14 @@ description: |
 - 경어 마스터: 경어 모듈 전체 완료
 - 메일 달인: 메일 모듈 전체 완료
 - 전화 프로: 전화 모듈 전체 완료
+
+**가나 배지**
+- 가나 비기너: 히라가나 10자 학습
+- 히라가나 하프: 히라가나 23자 마스터
+- 히라가나 마스터: 히라가나 46자 전부 마스터
+- 카타카나 비기너: 카타카나 10자 학습
+- 카타카나 마스터: 카타카나 46자 전부 마스터
+- 문자 졸업: 가나 학습 완료 → N5 승급
 
 **특별 배지**
 - 첫 걸음: 첫 학습 세션 완료

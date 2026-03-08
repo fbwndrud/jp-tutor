@@ -2,7 +2,7 @@
 description: "학습 데이터 내보내기. 어휘/문법/한자 목록을 CSV, Anki 덱 형식으로 내보냅니다."
 allowed-tools: ["Read", "Write", "Edit", "Bash"]
 model: haiku
-argument-hint: "[형식: csv|anki] [카테고리: vocab|grammar|kanji|business|textbook] [범위]"
+argument-hint: "[형식: csv|anki] [카테고리: kana|vocab|grammar|kanji|business|textbook] [범위]"
 ---
 
 # 학습 데이터 내보내기
@@ -21,6 +21,11 @@ argument-hint: "[형식: csv|anki] [카테고리: vocab|grammar|kanji|business|t
 ## CSV 내보내기
 
 `jp-data/exports/` 디렉토리가 없으면 생성합니다.
+
+### 가나 (kana)
+파일: `jp-data/exports/kana_{date}.csv`
+헤더: 문자,유형(히라가나/카타카나),발음,배지,정답수,시도수,정답률,마지막복습
+kana.concepts에서 `_hira`/`_kata` 접미사로 유형을 구분합니다.
 
 ### 어휘 (vocab)
 파일: `jp-data/exports/vocab_{level}_{date}.csv`

@@ -17,13 +17,22 @@ argument-hint: "[카테고리: vocab/grammar/kanji 또는 빈칸으로 혼합]"
    - jlpt: `skills/jp/references/curricula/japanese-jlpt.md`
    - business: `skills/jp/references/curricula/business-japanese.md`
 
-## 오늘의 학습 세트 구성
+## Pre-N5 레벨인 경우
+
+progress.json의 level이 "Pre-N5"인 경우, 일일 학습은 가나 중심으로 진행합니다:
+
+1. `skills/jp/references/curricula/kana.md`와 `skills/jp/references/exercise-types-kana.md`를 읽습니다.
+2. 가나 복습 대상 (kana.concepts에서 `nextReview <= 오늘`)을 우선 복습합니다.
+3. 현재 스테이지의 새 문자를 소개하고 연습합니다.
+4. 진행 방식은 `/jp:kana` 명령어와 동일하게 진행합니다.
+
+## 오늘의 학습 세트 구성 (N5 이상)
 
 오늘 날짜를 기준으로 학습 세트를 구성합니다. 목표: **복습 ~5개 + 신규 ~5개 = 약 10개 개념**
 
 ### Priority 1: 지연된 복습 항목
 
-progress.json의 모든 카테고리(vocab, grammar, kanji)에서 `nextReview <= 오늘`인 개념을 수집합니다.
+progress.json의 모든 카테고리(kana, vocab, grammar, kanji)에서 `nextReview <= 오늘`인 개념을 수집합니다.
 배지 우선순위로 정렬합니다: 빨강 > 노랑 > 초록 > 파랑
 상위 5개를 복습 세트로 선택합니다.
 

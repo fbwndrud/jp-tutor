@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>50음도</title>
+<style>
+:root {
+  --bg: #f8f9fa;
+  --bg-card: #ffffff;
+  --text: #2c3e50;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border: #e9ecef;
+  --badge-blue: #4A90D9;
+  --badge-green: #27AE60;
+  --badge-yellow: #F39C12;
+  --badge-red: #E74C3C;
+  --badge-gray: #BDC3C7;
+  --accent: #4A90D9;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a2e;
+    --bg-card: #16213e;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b0;
+    --text-muted: #555570;
+    --border: #2a2a4a;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  padding: 16px;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+/* Stats bar */
+.stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 80px;
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Chart grid */
+.chart {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.chart-row {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-row:last-child { border-bottom: none; }
+
+.chart-row.header {
+  background: var(--border);
+}
+
+.chart-cell {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  min-width: 0;
+  border-right: 1px solid var(--border);
+  position: relative;
+  cursor: default;
+}
+
+.chart-cell:last-child { border-right: none; }
+
+.chart-cell.row-label {
+  flex: 0 0 40px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border);
+}
+
+.chart-cell .kana {
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.chart-cell .romaji {
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+}
+
+.chart-cell.locked .kana {
+  color: var(--text-muted);
+}
+
+.chart-cell .badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin: 2px auto 0;
+}
+
+.chart-cell.empty { background: transparent; }
+
+/* Detail popup */
+.detail-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-overlay.show { display: flex; }
+
+.detail-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 32px 24px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.detail-kana {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.detail-romaji {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.detail-info {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.detail-word {
+  font-size: 1rem;
+  margin-top: 8px;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 8px;
+}
+
+.detail-close {
+  margin-top: 16px;
+  padding: 8px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Progress section */
+.progress-section {
+  margin-bottom: 16px;
+}
+
+.progress-bar-wrap {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+  .chart-cell .kana { font-size: 1rem; }
+  .chart-cell .romaji { font-size: 0.5rem; }
+  .chart-cell { padding: 6px 2px; }
+  .chart-cell.row-label { flex: 0 0 30px; font-size: 0.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+const DATA = null;
+
+(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<p style="text-align:center;padding:40px;color:var(--text-secondary)">데이터를 불러오는 중...</p>';
+    return;
+  }
+
+  var currentTab = 'hiragana';
+
+  var HIRAGANA_CHART = [
+    { label: '', row: ['a','i','u','e','o'], header: true },
+    { label: '-', row: [['あ','a'],['い','i'],['う','u'],['え','e'],['お','o']] },
+    { label: 'k', row: [['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko']] },
+    { label: 's', row: [['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so']] },
+    { label: 't', row: [['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to']] },
+    { label: 'n', row: [['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no']] },
+    { label: 'h', row: [['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho']] },
+    { label: 'm', row: [['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo']] },
+    { label: 'y', row: [['や','ya'],null,['ゆ','yu'],null,['よ','yo']] },
+    { label: 'r', row: [['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro']] },
+    { label: 'w', row: [['わ','wa'],null,null,null,['を','wo']] },
+    { label: 'N', row: [['ん','n'],null,null,null,null] }
+  ];
+
+  var KATAKANA_CHART = [
+    { label: '', row: ['a','i','u','e','o'], header: true },
+    { label: '-', row: [['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o']] },
+    { label: 'k', row: [['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko']] },
+    { label: 's', row: [['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so']] },
+    { label: 't', row: [['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to']] },
+    { label: 'n', row: [['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no']] },
+    { label: 'h', row: [['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho']] },
+    { label: 'm', row: [['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo']] },
+    { label: 'y', row: [['ヤ','ya'],null,['ユ','yu'],null,['ヨ','yo']] },
+    { label: 'r', row: [['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro']] },
+    { label: 'w', row: [['ワ','wa'],null,null,null,['ヲ','wo']] },
+    { label: 'N', row: [['ン','n'],null,null,null,null] }
+  ];
+
+  function esc(s) {
+    if (s == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(s);
+    return d.innerHTML;
+  }
+
+  function getBadgeColor(concept) {
+    if (!concept || concept.attempts === 0) return null;
+    var rate = concept.correct / concept.attempts;
+    if (concept.attempts >= 3) {
+      if (rate >= 0.8) return 'var(--badge-blue)';
+      if (rate >= 0.6) return 'var(--badge-green)';
+    }
+    if (rate >= 0.4) return 'var(--badge-yellow)';
+    return 'var(--badge-red)';
+  }
+
+  function getStats(type) {
+    var suffix = type === 'hiragana' ? '_hira' : '_kata';
+    var concepts = DATA.concepts || {};
+    var total = 0, learned = 0, mastered = 0;
+    var chart = type === 'hiragana' ? HIRAGANA_CHART : KATAKANA_CHART;
+    chart.forEach(function(r) {
+      if (r.header) return;
+      r.row.forEach(function(cell) {
+        if (!cell) return;
+        total++;
+        var key = cell[0] + suffix;
+        var c = concepts[key];
+        if (c && c.attempts > 0) {
+          learned++;
+          if (c.attempts >= 3 && c.correct / c.attempts >= 0.8) mastered++;
+        }
+      });
+    });
+    return { total: total, learned: learned, mastered: mastered };
+  }
+
+  function renderChart(chart, type) {
+    var suffix = type === 'hiragana' ? '_hira' : '_kata';
+    var concepts = DATA.concepts || {};
+    var html = '<div class="chart">';
+
+    chart.forEach(function(r) {
+      html += '<div class="chart-row' + (r.header ? ' header' : '') + '">';
+      html += '<div class="chart-cell row-label">' + esc(r.label) + '</div>';
+
+      r.row.forEach(function(cell) {
+        if (r.header) {
+          html += '<div class="chart-cell" style="font-weight:700;font-size:0.75rem">' + esc(cell) + '</div>';
+          return;
+        }
+        if (!cell) {
+          html += '<div class="chart-cell empty"></div>';
+          return;
+        }
+
+        var kana = cell[0], romaji = cell[1];
+        var key = kana + suffix;
+        var c = concepts[key];
+        var badgeColor = getBadgeColor(c);
+        var locked = !c || c.attempts === 0;
+        var stageNum = DATA.currentStage || 1;
+
+        html += '<div class="chart-cell' + (locked ? ' locked' : '') + '" data-kana="' + esc(kana) + '" data-type="' + type + '">';
+        html += '<div class="kana">' + esc(kana) + '</div>';
+        html += '<div class="romaji">' + esc(romaji) + '</div>';
+        if (badgeColor) {
+          html += '<div class="badge-dot" style="background:' + badgeColor + '"></div>';
+        }
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    html += '</div>';
+    return html;
+  }
+
+  function render() {
+    var hStats = getStats('hiragana');
+    var kStats = getStats('katakana');
+    var stats = currentTab === 'hiragana' ? hStats : kStats;
+
+    var html = '';
+    html += '<h1>50음도</h1>';
+    html += '<div class="subtitle">히라가나 Stage ' + (DATA.hiraStage || 1) + ' / 카타카나 Stage ' + (DATA.kataStage || 0) + '</div>';
+
+    // Tabs
+    html += '<div class="tabs">';
+    html += '<button class="tab' + (currentTab === 'hiragana' ? ' active' : '') + '" data-tab="hiragana">히라가나</button>';
+    html += '<button class="tab' + (currentTab === 'katakana' ? ' active' : '') + '" data-tab="katakana">카타카나</button>';
+    html += '</div>';
+
+    // Stats
+    html += '<div class="stats">';
+    html += '<div class="stat-item"><div class="stat-value">' + stats.learned + '/' + stats.total + '</div><div class="stat-label">학습</div></div>';
+    html += '<div class="stat-item"><div class="stat-value">' + stats.mastered + '</div><div class="stat-label">마스터</div></div>';
+    var pct = stats.total > 0 ? Math.round(stats.learned / stats.total * 100) : 0;
+    html += '<div class="stat-item"><div class="stat-value">' + pct + '%</div><div class="stat-label">진행률</div></div>';
+    html += '</div>';
+
+    // Progress bar
+    html += '<div class="progress-section">';
+    html += '<div class="progress-label"><span>' + (currentTab === 'hiragana' ? '히라가나' : '카타카나') + ' 진행률</span><span>' + pct + '%</span></div>';
+    html += '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:' + pct + '%;background:var(--accent)"></div></div>';
+    html += '</div>';
+
+    // Chart
+    if (currentTab === 'hiragana') {
+      html += renderChart(HIRAGANA_CHART, 'hiragana');
+    } else {
+      html += renderChart(KATAKANA_CHART, 'katakana');
+    }
+
+    // Legend
+    html += '<div class="legend" style="margin-top:12px">';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-blue)"></div>마스터</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-green)"></div>숙련</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-yellow)"></div>학습중</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-red)"></div>보강</div>';
+    html += '<div class="legend-item"><div class="legend-dot" style="background:var(--badge-gray)"></div>미학습</div>';
+    html += '</div>';
+
+    app.innerHTML = html;
+
+    // Detail overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'detail-overlay';
+    overlay.id = 'detail';
+    overlay.innerHTML = '<div class="detail-card" id="detail-card"></div>';
+    document.body.appendChild(overlay);
+
+    bindEvents();
+  }
+
+  function showDetail(kana, type) {
+    var suffix = type === 'hiragana' ? '_hira' : '_kata';
+    var key = kana + suffix;
+    var c = (DATA.concepts || {})[key];
+    var word = (DATA.words || {})[kana] || '';
+
+    var card = document.getElementById('detail-card');
+    var html = '<div class="detail-kana">' + esc(kana) + '</div>';
+
+    if (c && c.attempts > 0) {
+      var rate = Math.round(c.correct / c.attempts * 100);
+      var badgeColor = getBadgeColor(c);
+      html += '<div class="detail-info" style="margin-top:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + badgeColor + ';margin-right:4px;vertical-align:middle"></span>' + rate + '% (' + c.correct + '/' + c.attempts + ')</div>';
+    } else {
+      html += '<div class="detail-info" style="margin-top:8px">미학습</div>';
+    }
+
+    if (word) {
+      html += '<div class="detail-word">' + esc(word) + '</div>';
+    }
+
+    html += '<button class="detail-close" onclick="document.getElementById(\'detail\').classList.remove(\'show\')">닫기</button>';
+    card.innerHTML = html;
+    document.getElementById('detail').classList.add('show');
+  }
+
+  function bindEvents() {
+    document.querySelectorAll('.tab').forEach(function(t) {
+      t.addEventListener('click', function() {
+        currentTab = t.dataset.tab;
+        var old = document.getElementById('detail');
+        if (old) old.remove();
+        render();
+      });
+    });
+
+    document.querySelectorAll('.chart-cell[data-kana]').forEach(function(cell) {
+      cell.addEventListener('click', function() {
+        showDetail(cell.dataset.kana, cell.dataset.type);
+      });
+    });
+
+    var overlay = document.getElementById('detail');
+    if (overlay) {
+      overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.classList.remove('show');
+      });
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
