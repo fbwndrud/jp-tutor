@@ -18,6 +18,14 @@
   - `jp-tutor/skills/jp/references/templates/flashcard.html`
   - `jp-tutor/skills/jp/references/templates/kana-chart.html`
   - `jp-tutor/skills/jp/references/templates/dashboard.html` (통계 전용, TTS 불필요)
+- 게임 템플릿 (Kawaii Stationery 디자인 공유):
+  - `jp-tutor/skills/jp/references/templates/game-match.html`
+  - `jp-tutor/skills/jp/references/templates/game-shuffle.html`
+  - `jp-tutor/skills/jp/references/templates/game-snake.html`
+  - `jp-tutor/skills/jp/references/templates/game-stroke.html`
+  - `jp-tutor/skills/jp/references/templates/game-listen.html`
+  - `jp-tutor/skills/jp/references/templates/game-radical.html`
+  - `jp-tutor/skills/jp/references/templates/game-particle.html`
 - 하나만 고치고 나머지를 빠뜨리지 않는다
 
 ### 4. HTML 템플릿 DATA 주입 패턴
@@ -52,7 +60,9 @@ jp-tutor/
   commands/*.md                 ← 15개 명령어
   skills/jp/SKILL.md            ← 메인 스킬 (500줄 이내 유지)
   skills/jp/references/         ← 참조 문서
-  skills/jp/references/templates/ ← HTML 템플릿 (4개)
+  skills/jp/references/templates/ ← HTML 템플릿 (4개 기존 + 7개 게임)
+  skills/jp/references/game-recommendation.md
+  skills/jp/references/minigame-rules.md
   agents/*.md                   ← 3개 에이전트
 .claude-plugin/marketplace.json ← 버전 관리 (루트)
 README.md

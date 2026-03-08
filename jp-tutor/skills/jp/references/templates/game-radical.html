@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한자 조립</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.header .meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.header .meta span {
+  margin: 0 6px;
+}
+
+/* Timer bar */
+.timer-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: var(--radius-pill);
+  transition: width 0.3s linear;
+  width: 100%;
+}
+.timer-bar.warning { background: linear-gradient(90deg, var(--peach), var(--coral)); }
+.timer-bar.danger { background: var(--coral); }
+
+/* Progress */
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.progress-row .timer-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+.chain-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--pink), var(--coral));
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  animation: chainPulse 0.6s ease;
+}
+
+/* Meaning/reading info */
+.info-card {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+.info-card .meaning {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+.info-card .reading {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Preview overlay */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30,27,46,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.preview-overlay.hidden { display: none; }
+.preview-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+}
+.preview-card .label {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.preview-kanji {
+  font-family: var(--font-display);
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.preview-meaning {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.preview-countdown {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+/* Game area */
+.game-area {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Assembly zone */
+.assembly-zone {
+  margin-bottom: 24px;
+}
+.assembly-frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  min-height: 120px;
+}
+.assembly-frame.layout-top-bottom {
+  flex-direction: column;
+}
+.assembly-frame.layout-surround {
+  position: relative;
+  min-height: 140px;
+}
+
+/* Assembly slots */
+.assembly-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 2.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.assembly-slot.filled {
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--text);
+}
+.assembly-slot.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: scale(1.06);
+}
+.assembly-slot.correct {
+  border-color: var(--mint);
+  background: linear-gradient(135deg, rgba(126,200,168,0.15), rgba(126,200,168,0.08));
+  color: var(--text);
+  animation: correctPop 0.4s ease;
+}
+.assembly-slot.wrong {
+  border-color: var(--coral);
+  background: linear-gradient(135deg, rgba(232,139,139,0.15), rgba(232,139,139,0.08));
+  color: var(--text);
+  animation: shake 0.5s ease;
+}
+
+/* Surround layout special */
+.assembly-frame.layout-surround .assembly-slot.outer-slot {
+  width: 110px;
+  height: 110px;
+  font-size: 2.6rem;
+}
+.assembly-frame.layout-surround .assembly-slot.inner-slot {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  font-size: 1.6rem;
+  z-index: 2;
+}
+
+/* Assembly divider */
+.assembly-divider {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+/* Tile pool */
+.tiles-zone {
+  margin-bottom: 8px;
+}
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  min-height: 80px;
+}
+.part-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 76px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  cursor: grab;
+  transition: all 0.2s ease;
+  touch-action: none;
+  flex-shrink: 0;
+}
+.part-tile:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.part-tile:active { cursor: grabbing; transform: scale(0.95); }
+.part-tile.dummy {
+  background: linear-gradient(135deg, var(--peach), #e8a070);
+}
+.part-tile.placed {
+  opacity: 0.25;
+  pointer-events: none;
+  transform: scale(0.9);
+}
+.part-tile.dragging { opacity: 0.4; }
+
+/* Buttons */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.btn {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); }
+
+/* Kanji reveal */
+.reveal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30,27,46,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.reveal-overlay.hidden { display: none; }
+.reveal-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+}
+.reveal-kanji {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--text);
+  animation: kanjiReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.reveal-meaning {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 8px;
+}
+.reveal-reading {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.reveal-status {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  margin-top: 16px;
+  padding: 6px 20px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+}
+.reveal-status.ok {
+  background: var(--badge-green);
+  color: #fff;
+}
+.reveal-status.ng {
+  background: var(--badge-red);
+  color: #fff;
+}
+
+/* Result screen */
+.result-screen {
+  display: none;
+  text-align: center;
+}
+.result-screen.visible { display: block; }
+.result-header {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.result-score {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.result-chain {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.result-xp {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--mint), #5cb88a);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 8px 22px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 24px;
+}
+.result-list {
+  list-style: none;
+  margin-bottom: 24px;
+}
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+.result-item .q-kanji {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+.result-item .q-info {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-left: 10px;
+  flex: 1;
+  text-align: left;
+}
+.result-item .q-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+.result-item .q-status.ok { background: var(--badge-green); color: #fff; }
+.result-item .q-status.ng { background: var(--badge-red); color: #fff; }
+.result-item .q-status.timeout { background: var(--badge-yellow); color: #fff; }
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 200;
+  animation: confettiFall 1.2s ease-out forwards;
+}
+
+/* Green flash overlay */
+.flash-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  animation: greenFlash 0.5s ease forwards;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes correctPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+@keyframes kanjiReveal {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes chainPulse {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes greenFlash {
+  0% { background: rgba(126,200,168,0.3); }
+  100% { background: rgba(126,200,168,0); }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+.loading .spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading"><div class="spinner"></div>데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  var problems = DATA.problems || [];
+  var showPreviewFlag = DATA.showPreview !== false;
+  var previewTime = DATA.previewTime || 3;
+  var timeLimit = DATA.timeLimit || 30;
+  var chainMode = DATA.chainMode || false;
+  var showMeaning = DATA.showMeaning !== false;
+  var showReading = DATA.showReading || false;
+  var totalProblems = problems.length;
+  var currentIndex = 0;
+  var timerInterval = null;
+  var timeRemaining = timeLimit;
+  var results = [];
+  var gameActive = false;
+  var chainCount = 0;
+  var maxChain = 0;
+  var totalXP = 0;
+
+  // Slot state: array of { part, tileId } or null per slot
+  var slotState = [];
+  var tilePool = []; // { text, id, isDummy, placed }
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function getSlotCount(layout) {
+    if (layout === 'left-right-right') return 3;
+    if (layout === 'surround') return 2; // outer, inner
+    return 2; // left-right, top-bottom
+  }
+
+  function getLayoutClass(layout) {
+    if (layout === 'top-bottom') return 'layout-top-bottom';
+    if (layout === 'surround') return 'layout-surround';
+    return '';
+  }
+
+  function renderGame() {
+    var p = problems[currentIndex];
+    var slotCount = getSlotCount(p.layout);
+    slotState = new Array(slotCount).fill(null);
+
+    var allParts = p.parts.concat(p.dummies || []);
+    tilePool = shuffle(allParts.map(function(t, i) {
+      return {
+        text: t,
+        id: i,
+        isDummy: i >= p.parts.length,
+        placed: false
+      };
+    }));
+
+    app.innerHTML = buildGameHTML(p, slotCount);
+
+    if (showPreviewFlag) {
+      showPreview(p);
+    } else {
+      renderTilePool();
+      startTimer();
+      gameActive = true;
+    }
+  }
+
+  function buildGameHTML(p, slotCount) {
+    var infoHTML = '';
+    if (showMeaning || showReading) {
+      infoHTML = '<div class="info-card">';
+      if (showMeaning) infoHTML += '<div class="meaning">' + escapeHTML(p.meaning) + '</div>';
+      if (showReading) infoHTML += '<div class="reading">' + escapeHTML(p.reading) + '</div>';
+      infoHTML += '</div>';
+    }
+
+    var chainHTML = '';
+    if (chainMode && chainCount > 0) {
+      chainHTML = '<span class="chain-badge">체인 ' + chainCount + '</span>';
+    }
+
+    return '<div class="header">' +
+        '<h1>한자 조립</h1>' +
+        '<div class="meta"><span>Tier ' + DATA.tier + ' · ' + escapeHTML(DATA.tierName) + '</span><span>라운드 ' + DATA.roundNumber + '/' + DATA.totalRounds + '</span></div>' +
+      '</div>' +
+      '<div class="timer-bar-wrap"><div class="timer-bar" id="timerBar"></div></div>' +
+      '<div class="progress-row">' +
+        '<span>문제 ' + (currentIndex + 1) + '/' + totalProblems + '</span>' +
+        chainHTML +
+        '<span class="timer-text" id="timerText">' + timeLimit + '초</span>' +
+      '</div>' +
+      infoHTML +
+      '<div class="game-area">' +
+        '<div class="assembly-zone">' +
+          '<div class="section-label">조립 영역</div>' +
+          '<div class="assembly-frame ' + getLayoutClass(p.layout) + '" id="assemblyFrame">' +
+            buildSlots(p.layout, slotCount) +
+          '</div>' +
+        '</div>' +
+        '<div class="tiles-zone">' +
+          '<div class="section-label">부수 타일</div>' +
+          '<div class="tiles" id="tiles"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-secondary" id="resetBtn">초기화</button>' +
+        '<button class="btn btn-primary" id="submitBtn" disabled>조립 완료</button>' +
+      '</div>';
+  }
+
+  function buildSlots(layout, count) {
+    var html = '';
+    if (layout === 'surround') {
+      html += '<div class="assembly-slot outer-slot" data-slot="0"></div>';
+      html += '<div class="assembly-slot inner-slot" data-slot="1"></div>';
+    } else {
+      for (var i = 0; i < count; i++) {
+        html += '<div class="assembly-slot" data-slot="' + i + '"></div>';
+        if (i < count - 1) {
+          html += '<div class="assembly-divider">+</div>';
+        }
+      }
+    }
+    return html;
+  }
+
+  function renderTilePool() {
+    var container = document.getElementById('tiles');
+    if (!container) return;
+    var html = '';
+    tilePool.forEach(function(t) {
+      var cls = 'part-tile';
+      if (t.isDummy) cls += ' dummy';
+      if (t.placed) cls += ' placed';
+      html += '<div class="' + cls + '" data-id="' + t.id + '" draggable="true">' + escapeHTML(t.text) + '</div>';
+    });
+    container.innerHTML = html;
+    bindTileEvents();
+  }
+
+  function renderSlots() {
+    var slots = document.querySelectorAll('.assembly-slot');
+    slots.forEach(function(el) {
+      var idx = parseInt(el.getAttribute('data-slot'));
+      var state = slotState[idx];
+      if (state) {
+        el.textContent = state.part;
+        el.classList.add('filled');
+      } else {
+        el.textContent = '';
+        el.classList.remove('filled');
+      }
+      el.classList.remove('correct', 'wrong', 'drag-over');
+    });
+    updateSubmitBtn();
+  }
+
+  function updateSubmitBtn() {
+    var btn = document.getElementById('submitBtn');
+    if (!btn) return;
+    var allFilled = slotState.every(function(s) { return s !== null; });
+    btn.disabled = !allFilled;
+  }
+
+  function getNextEmptySlot() {
+    for (var i = 0; i < slotState.length; i++) {
+      if (slotState[i] === null) return i;
+    }
+    return -1;
+  }
+
+  function placeTile(tileId, slotIdx) {
+    var tile = getTileById(tileId);
+    if (!tile || tile.placed) return false;
+    if (slotState[slotIdx] !== null) return false;
+
+    tile.placed = true;
+    slotState[slotIdx] = { part: tile.text, tileId: tile.id };
+    renderSlots();
+    renderTilePool();
+    return true;
+  }
+
+  function removeTileFromSlot(slotIdx) {
+    var state = slotState[slotIdx];
+    if (!state) return;
+    var tile = getTileById(state.tileId);
+    if (tile) tile.placed = false;
+    slotState[slotIdx] = null;
+    renderSlots();
+    renderTilePool();
+  }
+
+  function resetAllSlots() {
+    for (var i = 0; i < slotState.length; i++) {
+      var state = slotState[i];
+      if (state) {
+        var tile = getTileById(state.tileId);
+        if (tile) tile.placed = false;
+      }
+      slotState[i] = null;
+    }
+    renderSlots();
+    renderTilePool();
+  }
+
+  function getTileById(id) {
+    for (var i = 0; i < tilePool.length; i++) {
+      if (tilePool[i].id === id) return tilePool[i];
+    }
+    return null;
+  }
+
+  function bindTileEvents() {
+    var tiles = document.querySelectorAll('.part-tile:not(.placed)');
+    tiles.forEach(function(el) {
+      // Click to place in next empty slot
+      el.addEventListener('click', function() {
+        if (!gameActive) return;
+        var id = parseInt(el.getAttribute('data-id'));
+        var nextSlot = getNextEmptySlot();
+        if (nextSlot >= 0) placeTile(id, nextSlot);
+      });
+
+      // Drag start
+      el.addEventListener('dragstart', function(e) {
+        if (!gameActive) return;
+        el.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', el.getAttribute('data-id'));
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      el.addEventListener('dragend', function() {
+        el.classList.remove('dragging');
+      });
+
+      // Touch drag
+      var touchStartX, touchStartY, touchClone;
+      el.addEventListener('touchstart', function(e) {
+        if (!gameActive) return;
+        var touch = e.touches[0];
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchClone = el.cloneNode(true);
+        touchClone.style.position = 'fixed';
+        touchClone.style.zIndex = '999';
+        touchClone.style.pointerEvents = 'none';
+        touchClone.style.opacity = '0.85';
+        touchClone.style.transform = 'scale(1.1)';
+        document.body.appendChild(touchClone);
+        updateTouchClone(touch);
+        el.classList.add('dragging');
+        e.preventDefault();
+      }, { passive: false });
+      el.addEventListener('touchmove', function(e) {
+        if (!touchClone) return;
+        var touch = e.touches[0];
+        updateTouchClone(touch);
+
+        // Highlight slot under finger
+        var slotEls = document.querySelectorAll('.assembly-slot');
+        slotEls.forEach(function(s) { s.classList.remove('drag-over'); });
+        var elem = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (elem && elem.classList.contains('assembly-slot') && !elem.classList.contains('filled')) {
+          elem.classList.add('drag-over');
+        }
+        e.preventDefault();
+      }, { passive: false });
+      el.addEventListener('touchend', function(e) {
+        el.classList.remove('dragging');
+        if (touchClone) {
+          document.body.removeChild(touchClone);
+          touchClone = null;
+        }
+        var touch = e.changedTouches[0];
+        var elem = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (elem && elem.classList.contains('assembly-slot')) {
+          var slotIdx = parseInt(elem.getAttribute('data-slot'));
+          if (slotState[slotIdx] === null) {
+            var id = parseInt(el.getAttribute('data-id'));
+            placeTile(id, slotIdx);
+          }
+        } else {
+          // If not dropped on slot, click-to-place
+          var dx = Math.abs(touch.clientX - touchStartX);
+          var dy = Math.abs(touch.clientY - touchStartY);
+          if (dx < 10 && dy < 10) {
+            var id = parseInt(el.getAttribute('data-id'));
+            var nextSlot = getNextEmptySlot();
+            if (nextSlot >= 0) placeTile(id, nextSlot);
+          }
+        }
+        document.querySelectorAll('.assembly-slot').forEach(function(s) { s.classList.remove('drag-over'); });
+      });
+
+      function updateTouchClone(touch) {
+        if (!touchClone) return;
+        touchClone.style.left = (touch.clientX - 38) + 'px';
+        touchClone.style.top = (touch.clientY - 38) + 'px';
+      }
+    });
+
+    // Bind slot events (click to remove, drag over)
+    bindSlotEvents();
+  }
+
+  function bindSlotEvents() {
+    var slots = document.querySelectorAll('.assembly-slot');
+    slots.forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (!gameActive) return;
+        var idx = parseInt(el.getAttribute('data-slot'));
+        if (slotState[idx]) removeTileFromSlot(idx);
+      });
+
+      el.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        if (!el.classList.contains('filled')) {
+          el.classList.add('drag-over');
+        }
+      });
+      el.addEventListener('dragleave', function() {
+        el.classList.remove('drag-over');
+      });
+      el.addEventListener('drop', function(e) {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        var slotIdx = parseInt(el.getAttribute('data-slot'));
+        if (slotState[slotIdx] !== null) return;
+        var id = parseInt(e.dataTransfer.getData('text/plain'));
+        if (!isNaN(id)) placeTile(id, slotIdx);
+      });
+    });
+
+    // Bind reset / submit buttons
+    var resetBtn = document.getElementById('resetBtn');
+    var submitBtn = document.getElementById('submitBtn');
+    if (resetBtn) {
+      resetBtn.onclick = function() { if (gameActive) resetAllSlots(); };
+    }
+    if (submitBtn) {
+      submitBtn.onclick = function() { if (gameActive) checkAnswer(); };
+    }
+  }
+
+  function showPreview(p) {
+    var overlay = document.createElement('div');
+    overlay.className = 'preview-overlay';
+    overlay.innerHTML = '<div class="preview-card">' +
+      '<div class="label">이 한자를 기억하세요!</div>' +
+      '<div class="preview-kanji">' + escapeHTML(p.answer) + '</div>' +
+      (showMeaning ? '<div class="preview-meaning">' + escapeHTML(p.meaning) + '</div>' : '') +
+      '<div class="preview-countdown" id="previewCount">' + previewTime + '</div>' +
+    '</div>';
+    document.body.appendChild(overlay);
+
+    var count = previewTime;
+    var countEl = overlay.querySelector('#previewCount');
+    var iv = setInterval(function() {
+      count--;
+      if (countEl) countEl.textContent = count;
+      if (count <= 0) {
+        clearInterval(iv);
+        overlay.classList.add('hidden');
+        setTimeout(function() {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 300);
+        renderTilePool();
+        startTimer();
+        gameActive = true;
+      }
+    }, 1000);
+  }
+
+  function startTimer() {
+    timeRemaining = timeLimit;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+      timeRemaining--;
+      updateTimerUI();
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        gameActive = false;
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function updateTimerUI() {
+    var bar = document.getElementById('timerBar');
+    var text = document.getElementById('timerText');
+    if (!bar || !text) return;
+    var pct = (timeRemaining / timeLimit) * 100;
+    bar.style.width = pct + '%';
+    text.textContent = timeRemaining + '초';
+
+    bar.classList.remove('warning', 'danger');
+    if (pct <= 20) bar.classList.add('danger');
+    else if (pct <= 40) bar.classList.add('warning');
+  }
+
+  function checkAnswer() {
+    gameActive = false;
+    clearInterval(timerInterval);
+    var p = problems[currentIndex];
+    var userParts = slotState.map(function(s) { return s ? s.part : ''; });
+    var correctParts = p.parts;
+
+    var isCorrect = true;
+    var slots = document.querySelectorAll('.assembly-slot');
+
+    for (var i = 0; i < correctParts.length; i++) {
+      if (userParts[i] === correctParts[i]) {
+        if (slots[i]) slots[i].classList.add('correct');
+      } else {
+        isCorrect = false;
+        if (slots[i]) slots[i].classList.add('wrong');
+      }
+    }
+
+    if (isCorrect) {
+      chainCount++;
+      if (chainCount > maxChain) maxChain = chainCount;
+      var xp = 10 + (chainMode ? Math.min(chainCount - 1, 5) * 2 : 0);
+      totalXP += xp;
+      results.push({ problem: p, status: 'ok', xp: xp });
+
+      // Green flash
+      var flash = document.createElement('div');
+      flash.className = 'flash-overlay';
+      document.body.appendChild(flash);
+      setTimeout(function() { if (flash.parentNode) flash.parentNode.removeChild(flash); }, 600);
+
+      spawnConfetti();
+
+      setTimeout(function() {
+        showReveal(p, true);
+      }, 500);
+    } else {
+      chainCount = 0;
+      results.push({ problem: p, status: 'ng', xp: 0 });
+
+      setTimeout(function() {
+        showCorrectAnimation(p, function() {
+          showReveal(p, false);
+        });
+      }, 600);
+    }
+  }
+
+  function handleTimeout() {
+    var p = problems[currentIndex];
+    chainCount = 0;
+    results.push({ problem: p, status: 'timeout', xp: 0 });
+    showCorrectAnimation(p, function() {
+      showReveal(p, false);
+    });
+  }
+
+  function showCorrectAnimation(p, callback) {
+    // Animate parts sliding into correct positions
+    var slots = document.querySelectorAll('.assembly-slot');
+    for (var i = 0; i < slotState.length; i++) {
+      if (slotState[i]) {
+        var tile = getTileById(slotState[i].tileId);
+        if (tile) tile.placed = false;
+      }
+      slotState[i] = null;
+    }
+
+    // Fill correct parts one by one with delay
+    var delay = 0;
+    p.parts.forEach(function(part, i) {
+      setTimeout(function() {
+        slotState[i] = { part: part, tileId: -1 };
+        if (slots[i]) {
+          slots[i].textContent = part;
+          slots[i].classList.remove('wrong');
+          slots[i].classList.add('filled', 'correct');
+        }
+        if (i === p.parts.length - 1) {
+          setTimeout(callback, 600);
+        }
+      }, delay);
+      delay += 300;
+    });
+  }
+
+  function showReveal(p, isCorrect) {
+    var overlay = document.createElement('div');
+    overlay.className = 'reveal-overlay';
+    overlay.innerHTML = '<div class="reveal-card">' +
+      '<div class="reveal-kanji">' + escapeHTML(p.answer) + '</div>' +
+      '<div class="reveal-meaning">' + escapeHTML(p.meaning) + '</div>' +
+      '<div class="reveal-reading">' + escapeHTML(p.reading) + '</div>' +
+      '<div class="reveal-status ' + (isCorrect ? 'ok' : 'ng') + '">' +
+        (isCorrect ? '정답!' : '오답') +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(overlay);
+
+    var autoTime = chainMode && isCorrect ? 1500 : 2500;
+    setTimeout(function() {
+      overlay.classList.add('hidden');
+      setTimeout(function() {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 300);
+      nextProblem();
+    }, autoTime);
+
+    // Also allow click to dismiss
+    overlay.addEventListener('click', function() {
+      overlay.classList.add('hidden');
+      setTimeout(function() {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 300);
+      nextProblem();
+    });
+    // Prevent double advance
+    var advanced = false;
+    function nextProblem() {
+      if (advanced) return;
+      advanced = true;
+      advanceProblem();
+    }
+  }
+
+  function advanceProblem() {
+    currentIndex++;
+    if (currentIndex < totalProblems) {
+      timeRemaining = timeLimit;
+      gameActive = false;
+      renderGame();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    clearInterval(timerInterval);
+    var correct = results.filter(function(r) { return r.status === 'ok'; }).length;
+
+    var grade = '수고했어요!';
+    if (correct === totalProblems) grade = '완벽해요!';
+    else if (correct >= totalProblems * 0.7) grade = '잘했어요!';
+
+    var listHTML = '';
+    results.forEach(function(r) {
+      var statusCls = r.status === 'ok' ? 'ok' : (r.status === 'timeout' ? 'timeout' : 'ng');
+      var statusText = r.status === 'ok' ? '정답' : (r.status === 'timeout' ? '시간초과' : '오답');
+      listHTML += '<div class="result-item">' +
+        '<span class="q-kanji">' + escapeHTML(r.problem.answer) + '</span>' +
+        '<span class="q-info">' + escapeHTML(r.problem.meaning) + ' · ' + escapeHTML(r.problem.parts.join(' + ')) + '</span>' +
+        '<span class="q-status ' + statusCls + '">' + statusText + '</span>' +
+      '</div>';
+    });
+
+    app.innerHTML = '<div class="result-screen visible">' +
+      '<div class="result-header">' + grade + '</div>' +
+      '<div class="result-score">' + correct + ' / ' + totalProblems + ' 정답</div>' +
+      (chainMode ? '<div class="result-chain">최대 체인: ' + maxChain + '</div>' : '') +
+      '<div class="result-xp">+' + totalXP + ' XP</div>' +
+      '<ul class="result-list">' + listHTML + '</ul>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="retryBtn">다시 하기</button>' +
+      '</div>' +
+    '</div>';
+
+    document.getElementById('retryBtn').onclick = function() {
+      currentIndex = 0;
+      results = [];
+      chainCount = 0;
+      maxChain = 0;
+      totalXP = 0;
+      renderGame();
+    };
+
+    if (results.every(function(r) { return r.status === 'ok'; })) {
+      spawnConfetti();
+    }
+  }
+
+  function spawnConfetti() {
+    var colors = ['#9B7FD4', '#F2A5B7', '#7EC8A8', '#F4B183', '#B9A0E8'];
+    for (var i = 0; i < 30; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      piece.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+      piece.style.width = (6 + Math.random() * 8) + 'px';
+      piece.style.height = (6 + Math.random() * 8) + 'px';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(piece);
+      setTimeout(function(el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }.bind(null, piece), 2000);
+    }
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Start
+  renderGame();
+
+})();
+</script>
+</body>
+</html>

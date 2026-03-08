@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>셔플 퍼즐</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.header .meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.header .meta span {
+  margin: 0 6px;
+}
+
+/* Timer bar */
+.timer-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: var(--radius-pill);
+  transition: width 0.3s linear;
+  width: 100%;
+}
+.timer-bar.warning { background: linear-gradient(90deg, var(--peach), var(--coral)); }
+.timer-bar.danger { background: var(--coral); }
+
+/* Progress */
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.progress-row .timer-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Preview overlay */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30,27,46,0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.preview-overlay.hidden { display: none; }
+.preview-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 28px 24px;
+  text-align: center;
+  max-width: 440px;
+  width: 90%;
+}
+.preview-card .label {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.preview-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.preview-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow);
+}
+.preview-countdown {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+/* Game area */
+.game-area {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Slots (answer zone) */
+.slots-zone {
+  margin-bottom: 24px;
+}
+.slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  min-height: 52px;
+}
+.slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 10px 18px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-sunken);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+.slot.filled {
+  border-style: solid;
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.slot.dummy-filled {
+  border-color: var(--peach);
+  background: linear-gradient(135deg, var(--peach), #e8a070);
+}
+.slot.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: scale(1.05);
+}
+.slot.correct {
+  border-color: var(--mint);
+  background: linear-gradient(135deg, var(--mint), #5cb88a);
+  color: #fff;
+  animation: correctPop 0.4s ease;
+}
+.slot.wrong {
+  border-color: var(--coral);
+  background: linear-gradient(135deg, var(--coral), #d06060);
+  color: #fff;
+  animation: shake 0.5s ease;
+}
+.slot.hint-highlight {
+  border-color: var(--mint);
+  background: var(--accent-light);
+  animation: hintPulse 1s ease 2;
+}
+
+/* Tiles (pool) */
+.tiles-zone {
+  margin-bottom: 8px;
+}
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  min-height: 52px;
+}
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow);
+  cursor: grab;
+  transition: all 0.2s ease;
+  position: relative;
+  touch-action: none;
+}
+.tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.tile:active { cursor: grabbing; transform: scale(0.95); }
+.tile.dummy {
+  background: linear-gradient(135deg, var(--peach), #e8a070);
+}
+.tile.hidden-tile {
+  background: linear-gradient(135deg, var(--badge-gray), #a09ab0);
+}
+.tile.hidden-tile.revealed {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  animation: revealFlash 0.3s ease;
+}
+.tile.placed { opacity: 0; pointer-events: none; height: 0; padding: 0; margin: 0; min-width: 0; overflow: hidden; }
+.tile.dragging { opacity: 0.5; }
+
+/* Buttons row */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.btn {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); }
+.btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Translation card */
+.translation-card {
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s ease;
+}
+.translation-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Result screen */
+.result-screen {
+  display: none;
+  text-align: center;
+}
+.result-screen.visible { display: block; }
+.result-header {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.result-score {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.result-xp {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--mint), #5cb88a);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 8px 22px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 24px;
+}
+.result-list {
+  list-style: none;
+  margin-bottom: 24px;
+}
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+.result-item .q-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+}
+.result-item .q-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+}
+.result-item .q-status.ok { background: var(--badge-green); color: #fff; }
+.result-item .q-status.ng { background: var(--badge-red); color: #fff; }
+.result-item .q-status.timeout { background: var(--badge-yellow); color: #fff; }
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 200;
+  animation: confettiFall 1.2s ease-out forwards;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes correctPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+@keyframes hintPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(126,200,168,0); }
+  50% { box-shadow: 0 0 0 8px rgba(126,200,168,0.3); }
+}
+@keyframes revealFlash {
+  0% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+.loading .spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading"><div class="spinner"></div>데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  var problems = DATA.problems || [];
+  var previewTime = DATA.previewTime || 5;
+  var timeLimit = DATA.timeLimit || 30;
+  var hintCount = DATA.hintCount || 0;
+  var totalProblems = problems.length;
+  var currentIndex = 0;
+  var hintsLeft = hintCount;
+  var timerInterval = null;
+  var timeRemaining = timeLimit;
+  var results = [];
+  var placedTiles = [];
+  var tilePool = [];
+  var allTilesForProblem = [];
+  var isDragging = false;
+  var dragTile = null;
+  var dragClone = null;
+  var gameActive = false;
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function renderGame() {
+    var p = problems[currentIndex];
+    var answerLen = p.answer.length;
+    hintsLeft = hintCount;
+    placedTiles = new Array(answerLen).fill(null);
+    allTilesForProblem = p.tiles.concat(p.dummies || []);
+    tilePool = shuffle(allTilesForProblem.map(function(t, i) {
+      return {
+        text: t,
+        id: i,
+        isDummy: (p.dummies || []).indexOf(t) !== -1 && i >= p.tiles.length,
+        isHidden: (p.hiddenTiles || []).indexOf(t) !== -1,
+        revealed: false,
+        placed: false
+      };
+    }));
+
+    app.innerHTML = buildGameHTML(p, answerLen);
+    showPreview(p);
+  }
+
+  function buildGameHTML(p, answerLen) {
+    var hintBtn = hintCount > 0
+      ? '<button class="btn btn-secondary" id="hintBtn">힌트 (' + hintsLeft + ')</button>'
+      : '';
+
+    return '<div class="header">' +
+        '<h1>셔플 퍼즐</h1>' +
+        '<div class="meta"><span>Tier ' + DATA.tier + ' · ' + DATA.tierName + '</span><span>라운드 ' + DATA.roundNumber + '/' + DATA.totalRounds + '</span></div>' +
+      '</div>' +
+      '<div class="timer-bar-wrap"><div class="timer-bar" id="timerBar"></div></div>' +
+      '<div class="progress-row">' +
+        '<span>문제 ' + (currentIndex + 1) + '/' + totalProblems + '</span>' +
+        '<span class="timer-text" id="timerText">' + timeLimit + '초</span>' +
+      '</div>' +
+      '<div class="game-area">' +
+        '<div class="slots-zone">' +
+          '<div class="section-label">정답 슬롯</div>' +
+          '<div class="slots" id="slots">' + buildSlots(answerLen) + '</div>' +
+        '</div>' +
+        '<div class="tiles-zone">' +
+          '<div class="section-label">타일 영역</div>' +
+          '<div class="tiles" id="tiles"></div>' +
+        '</div>' +
+        '<div class="translation-card" id="translation">' + p.translation + '</div>' +
+      '</div>' +
+      '<div class="btn-row">' +
+        hintBtn +
+        '<button class="btn btn-primary" id="submitBtn" disabled>제출</button>' +
+      '</div>';
+  }
+
+  function buildSlots(count) {
+    var html = '';
+    for (var i = 0; i < count; i++) {
+      html += '<div class="slot" data-index="' + i + '"></div>';
+    }
+    return html;
+  }
+
+  function renderTilePool() {
+    var container = document.getElementById('tiles');
+    if (!container) return;
+    var html = '';
+    tilePool.forEach(function(t) {
+      var cls = 'tile';
+      if (t.isDummy) cls += ' dummy';
+      if (t.isHidden && !t.revealed) cls += ' hidden-tile';
+      if (t.placed) cls += ' placed';
+      var display = (t.isHidden && !t.revealed) ? '？' : t.text;
+      html += '<div class="' + cls + '" data-id="' + t.id + '" draggable="true">' + display + '</div>';
+    });
+    container.innerHTML = html;
+    bindTileEvents();
+  }
+
+  function bindTileEvents() {
+    var tiles = document.querySelectorAll('.tile:not(.placed)');
+    tiles.forEach(function(el) {
+      // Click to place
+      el.addEventListener('click', function(e) {
+        if (!gameActive) return;
+        var id = parseInt(el.getAttribute('data-id'));
+        var t = getTileById(id);
+        if (!t) return;
+
+        // Hidden tile: reveal briefly
+        if (t.isHidden && !t.revealed) {
+          t.revealed = true;
+          renderTilePool();
+          setTimeout(function() {
+            t.revealed = false;
+            if (!t.placed) renderTilePool();
+          }, 1000);
+          return;
+        }
+
+        // Place in next empty slot
+        for (var i = 0; i < placedTiles.length; i++) {
+          if (placedTiles[i] === null) {
+            placeTile(id, i);
+            break;
+          }
+        }
+      });
+
+      // Drag start
+      el.addEventListener('dragstart', function(e) {
+        if (!gameActive) { e.preventDefault(); return; }
+        var id = parseInt(el.getAttribute('data-id'));
+        var t = getTileById(id);
+        if (t && t.isHidden && !t.revealed) { e.preventDefault(); return; }
+        e.dataTransfer.setData('text/plain', el.getAttribute('data-id'));
+        e.dataTransfer.effectAllowed = 'move';
+        el.classList.add('dragging');
+        isDragging = true;
+        dragTile = id;
+      });
+
+      el.addEventListener('dragend', function() {
+        el.classList.remove('dragging');
+        isDragging = false;
+        dragTile = null;
+      });
+
+      // Touch drag
+      el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    });
+  }
+
+  function handleTouchStart(e) {
+    if (!gameActive) return;
+    var el = e.currentTarget;
+    var id = parseInt(el.getAttribute('data-id'));
+    var t = getTileById(id);
+    if (t && t.isHidden && !t.revealed) {
+      t.revealed = true;
+      renderTilePool();
+      setTimeout(function() {
+        t.revealed = false;
+        if (!t.placed) renderTilePool();
+      }, 1000);
+      return;
+    }
+
+    e.preventDefault();
+    isDragging = true;
+    dragTile = id;
+
+    var touch = e.touches[0];
+    var rect = el.getBoundingClientRect();
+    dragClone = el.cloneNode(true);
+    dragClone.style.position = 'fixed';
+    dragClone.style.left = (touch.clientX - rect.width / 2) + 'px';
+    dragClone.style.top = (touch.clientY - rect.height / 2) + 'px';
+    dragClone.style.zIndex = '300';
+    dragClone.style.pointerEvents = 'none';
+    dragClone.style.opacity = '0.85';
+    document.body.appendChild(dragClone);
+    el.classList.add('dragging');
+
+    var onMove = function(ev) {
+      var tc = ev.touches[0];
+      dragClone.style.left = (tc.clientX - rect.width / 2) + 'px';
+      dragClone.style.top = (tc.clientY - rect.height / 2) + 'px';
+
+      // Highlight slot under finger
+      document.querySelectorAll('.slot').forEach(function(s) { s.classList.remove('drag-over'); });
+      var elem = document.elementFromPoint(tc.clientX, tc.clientY);
+      if (elem && elem.classList.contains('slot')) {
+        elem.classList.add('drag-over');
+      }
+    };
+
+    var onEnd = function(ev) {
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+      if (dragClone && dragClone.parentNode) dragClone.parentNode.removeChild(dragClone);
+      dragClone = null;
+      el.classList.remove('dragging');
+      document.querySelectorAll('.slot').forEach(function(s) { s.classList.remove('drag-over'); });
+
+      var tc = ev.changedTouches[0];
+      var elem = document.elementFromPoint(tc.clientX, tc.clientY);
+      if (elem && elem.classList.contains('slot')) {
+        var slotIdx = parseInt(elem.getAttribute('data-index'));
+        if (placedTiles[slotIdx] === null) {
+          placeTile(dragTile, slotIdx);
+        }
+      }
+      isDragging = false;
+      dragTile = null;
+    };
+
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+  }
+
+  function bindSlotEvents() {
+    document.querySelectorAll('.slot').forEach(function(el) {
+      el.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        el.classList.add('drag-over');
+      });
+      el.addEventListener('dragleave', function() {
+        el.classList.remove('drag-over');
+      });
+      el.addEventListener('drop', function(e) {
+        e.preventDefault();
+        el.classList.remove('drag-over');
+        var id = parseInt(e.dataTransfer.getData('text/plain'));
+        var slotIdx = parseInt(el.getAttribute('data-index'));
+        if (placedTiles[slotIdx] === null) {
+          placeTile(id, slotIdx);
+        }
+      });
+      // Click to remove
+      el.addEventListener('click', function() {
+        if (!gameActive) return;
+        var slotIdx = parseInt(el.getAttribute('data-index'));
+        if (placedTiles[slotIdx] !== null) {
+          removeTile(slotIdx);
+        }
+      });
+    });
+  }
+
+  function getTileById(id) {
+    for (var i = 0; i < tilePool.length; i++) {
+      if (tilePool[i].id === id) return tilePool[i];
+    }
+    return null;
+  }
+
+  function placeTile(tileId, slotIdx) {
+    var t = getTileById(tileId);
+    if (!t || t.placed) return;
+    t.placed = true;
+    placedTiles[slotIdx] = t;
+    renderTilePool();
+    updateSlots();
+    updateSubmitBtn();
+  }
+
+  function removeTile(slotIdx) {
+    var t = placedTiles[slotIdx];
+    if (!t) return;
+    t.placed = false;
+    t.revealed = false;
+    placedTiles[slotIdx] = null;
+    renderTilePool();
+    updateSlots();
+    updateSubmitBtn();
+  }
+
+  function updateSlots() {
+    document.querySelectorAll('.slot').forEach(function(el) {
+      var idx = parseInt(el.getAttribute('data-index'));
+      var t = placedTiles[idx];
+      if (t) {
+        el.textContent = t.isHidden && !t.revealed ? '？' : t.text;
+        el.className = 'slot filled' + (t.isDummy ? ' dummy-filled' : '');
+      } else {
+        el.textContent = '';
+        el.className = 'slot';
+      }
+    });
+  }
+
+  function updateSubmitBtn() {
+    var btn = document.getElementById('submitBtn');
+    if (!btn) return;
+    var allFilled = placedTiles.every(function(t) { return t !== null; });
+    btn.disabled = !allFilled;
+  }
+
+  function showPreview(p) {
+    var overlay = document.createElement('div');
+    overlay.className = 'preview-overlay';
+    var tilesHTML = p.answer.map(function(t) {
+      return '<div class="preview-tile">' + t + '</div>';
+    }).join('');
+    overlay.innerHTML = '<div class="preview-card">' +
+      '<div class="label">정답을 기억하세요!</div>' +
+      '<div class="preview-tiles">' + tilesHTML + '</div>' +
+      '<div class="preview-countdown" id="previewCount">' + previewTime + '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    var remaining = previewTime;
+    var countEl = overlay.querySelector('#previewCount');
+    var countInterval = setInterval(function() {
+      remaining--;
+      if (countEl) countEl.textContent = remaining;
+      if (remaining <= 0) {
+        clearInterval(countInterval);
+        overlay.classList.add('hidden');
+        setTimeout(function() {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 300);
+        startRound();
+      }
+    }, 1000);
+  }
+
+  function startRound() {
+    gameActive = true;
+    timeRemaining = timeLimit;
+    renderTilePool();
+    bindSlotEvents();
+    bindGameButtons();
+    startTimer();
+  }
+
+  function bindGameButtons() {
+    var submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function() {
+        if (gameActive) checkAnswer();
+      });
+    }
+
+    var hintBtn = document.getElementById('hintBtn');
+    if (hintBtn) {
+      hintBtn.addEventListener('click', function() {
+        if (!gameActive || hintsLeft <= 0) return;
+        useHint();
+      });
+    }
+  }
+
+  function startTimer() {
+    var bar = document.getElementById('timerBar');
+    var text = document.getElementById('timerText');
+    timerInterval = setInterval(function() {
+      timeRemaining -= 0.1;
+      if (timeRemaining < 0) timeRemaining = 0;
+      var pct = (timeRemaining / timeLimit) * 100;
+      if (bar) {
+        bar.style.width = pct + '%';
+        bar.className = 'timer-bar' + (pct < 20 ? ' danger' : pct < 40 ? ' warning' : '');
+      }
+      if (text) text.textContent = Math.ceil(timeRemaining) + '초';
+      if (timeRemaining <= 0) {
+        clearInterval(timerInterval);
+        checkAnswer();
+      }
+    }, 100);
+  }
+
+  function useHint() {
+    hintsLeft--;
+    var hintBtn = document.getElementById('hintBtn');
+    if (hintBtn) {
+      hintBtn.textContent = '힌트 (' + hintsLeft + ')';
+      if (hintsLeft <= 0) hintBtn.disabled = true;
+    }
+
+    var p = problems[currentIndex];
+    // Find first empty slot and highlight it with the correct tile text
+    for (var i = 0; i < placedTiles.length; i++) {
+      if (placedTiles[i] === null) {
+        var slotEl = document.querySelector('.slot[data-index="' + i + '"]');
+        if (slotEl) {
+          slotEl.classList.add('hint-highlight');
+          slotEl.textContent = p.answer[i];
+          setTimeout(function(el) {
+            el.classList.remove('hint-highlight');
+            if (placedTiles[parseInt(el.getAttribute('data-index'))] === null) {
+              el.textContent = '';
+            }
+          }.bind(null, slotEl), 2000);
+        }
+        break;
+      }
+    }
+  }
+
+  function checkAnswer() {
+    gameActive = false;
+    clearInterval(timerInterval);
+    var p = problems[currentIndex];
+    var userAnswer = placedTiles.map(function(t) { return t ? t.text : ''; });
+    var correct = true;
+    var wrongIndices = [];
+
+    for (var i = 0; i < p.answer.length; i++) {
+      if (userAnswer[i] !== p.answer[i]) {
+        correct = false;
+        wrongIndices.push(i);
+      }
+    }
+
+    var timeUsed = timeLimit - Math.max(0, timeRemaining);
+
+    if (correct) {
+      results.push({ correct: true, timeUsed: timeUsed, problem: p });
+      // Show correct animation
+      document.querySelectorAll('.slot').forEach(function(el) {
+        el.classList.add('correct');
+      });
+      var trans = document.getElementById('translation');
+      if (trans) trans.classList.add('visible');
+      spawnConfetti();
+      setTimeout(nextProblem, 1800);
+    } else {
+      if (timeRemaining <= 0) {
+        results.push({ correct: false, timeUsed: timeLimit, problem: p, timeout: true });
+        // Show all correct/wrong
+        document.querySelectorAll('.slot').forEach(function(el) {
+          var idx = parseInt(el.getAttribute('data-index'));
+          if (wrongIndices.indexOf(idx) !== -1) {
+            el.classList.add('wrong');
+          } else if (placedTiles[idx]) {
+            el.classList.add('correct');
+          }
+        });
+        var trans = document.getElementById('translation');
+        if (trans) {
+          trans.textContent = '정답: ' + p.answer.join(' ') + ' — ' + p.translation;
+          trans.classList.add('visible');
+        }
+        setTimeout(nextProblem, 2200);
+      } else {
+        results.push({ correct: false, timeUsed: timeUsed, problem: p, timeout: false });
+        // Shake wrong slots, return those tiles
+        wrongIndices.forEach(function(idx) {
+          var slotEl = document.querySelector('.slot[data-index="' + idx + '"]');
+          if (slotEl) slotEl.classList.add('wrong');
+        });
+        setTimeout(function() {
+          // Return wrong tiles to pool
+          wrongIndices.forEach(function(idx) {
+            removeTile(idx);
+          });
+          document.querySelectorAll('.slot.wrong').forEach(function(el) {
+            el.classList.remove('wrong');
+          });
+          var trans = document.getElementById('translation');
+          if (trans) {
+            trans.textContent = '정답: ' + p.answer.join(' ') + ' — ' + p.translation;
+            trans.classList.add('visible');
+          }
+          setTimeout(nextProblem, 1500);
+        }, 800);
+      }
+    }
+  }
+
+  function nextProblem() {
+    currentIndex++;
+    if (currentIndex >= totalProblems) {
+      showResults();
+    } else {
+      renderGame();
+    }
+  }
+
+  function showResults() {
+    var correctCount = results.filter(function(r) { return r.correct; }).length;
+    var scorePct = Math.round((correctCount / totalProblems) * 100);
+    var baseXP = correctCount * 15;
+    var bonusXP = results.reduce(function(sum, r) {
+      return sum + (r.correct && r.timeUsed < timeLimit * 0.5 ? 5 : 0);
+    }, 0);
+    var totalXP = baseXP + bonusXP;
+
+    var listHTML = results.map(function(r, i) {
+      var status = r.correct ? '<span class="q-status ok">정답</span>' :
+        (r.timeout ? '<span class="q-status timeout">시간 초과</span>' : '<span class="q-status ng">오답</span>');
+      return '<li class="result-item"><span class="q-text">' + r.problem.answer.join(' ') + '</span>' + status + '</li>';
+    }).join('');
+
+    app.innerHTML = '<div class="result-screen visible">' +
+      '<div class="result-header">결과</div>' +
+      '<div class="result-score">' + correctCount + ' / ' + totalProblems + ' 정답 (' + scorePct + '%)</div>' +
+      '<div class="result-xp">+' + totalXP + ' XP</div>' +
+      '<ul class="result-list">' + listHTML + '</ul>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="retryBtn">다시 하기</button>' +
+      '</div>' +
+      '</div>';
+
+    document.getElementById('retryBtn').addEventListener('click', function() {
+      currentIndex = 0;
+      results = [];
+      renderGame();
+    });
+  }
+
+  function spawnConfetti() {
+    var colors = ['#9B7FD4', '#F2A5B7', '#7EC8A8', '#F4B183', '#E88B8B'];
+    for (var i = 0; i < 30; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (Math.random() * 100) + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (6 + Math.random() * 8) + 'px';
+      piece.style.height = (6 + Math.random() * 8) + 'px';
+      piece.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
+      document.body.appendChild(piece);
+      setTimeout(function(el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }.bind(null, piece), 2000);
+    }
+  }
+
+  // Initialize
+  renderGame();
+
+})();
+</script>
+</body>
+</html>

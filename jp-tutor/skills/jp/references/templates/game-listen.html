@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>듣고 그리기</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+.loading .spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.header .meta {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.header .meta span {
+  margin: 0 6px;
+}
+
+/* Progress bar */
+.progress-wrap {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* TTS button */
+.tts-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-speak {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 16px rgba(155,127,212,0.3);
+}
+.btn-speak:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(155,127,212,0.4);
+}
+.btn-speak:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-speak.speaking {
+  animation: speakPulse 1.5s ease-in-out infinite;
+  box-shadow: 0 0 0 6px rgba(242,165,183,0.2), 0 4px 16px rgba(155,127,212,0.3);
+}
+
+@keyframes speakPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 6px rgba(242,165,183,0.2), 0 4px 16px rgba(155,127,212,0.3); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(242,165,183,0.1), 0 6px 24px rgba(155,127,212,0.4); }
+}
+
+.plays-badge {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+}
+
+.row-hint {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-light);
+  border-radius: var(--radius-pill);
+  padding: 6px 18px;
+}
+
+/* Canvas area */
+.canvas-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  touch-action: none;
+}
+
+.canvas-wrap canvas {
+  display: block;
+}
+
+/* Grid lines on canvas */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.canvas-grid::before,
+.canvas-grid::after {
+  content: '';
+  position: absolute;
+  background: var(--border);
+  opacity: 0.4;
+}
+.canvas-grid::before {
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+}
+.canvas-grid::after {
+  left: 50%;
+  top: 10%;
+  bottom: 10%;
+  width: 1px;
+}
+
+/* Buttons */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 28px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-secondary {
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+  border: 1.5px solid var(--border);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); }
+
+/* Answer reveal */
+.reveal-section {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+  animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.reveal-section.visible { display: flex; }
+
+.reveal-char {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.reveal-reading {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.reveal-score {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 6px 20px;
+  border-radius: var(--radius-pill);
+  color: #fff;
+}
+.reveal-score.pass { background: var(--badge-green); }
+.reveal-score.fail { background: var(--badge-red); }
+
+/* Stroke animation canvas */
+.stroke-anim-wrap {
+  width: 200px;
+  height: 200px;
+  margin-top: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  overflow: hidden;
+}
+
+/* Flash overlay */
+.flash-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.flash-overlay.green { background: rgba(126,200,168,0.25); opacity: 1; }
+.flash-overlay.red { background: rgba(232,139,139,0.25); opacity: 1; }
+
+/* Result screen */
+.result-screen {
+  display: none;
+  text-align: center;
+}
+.result-screen.visible { display: block; }
+.result-header {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.result-score-main {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.result-rate {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.result-list {
+  list-style: none;
+  margin-bottom: 24px;
+}
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+}
+.result-item .q-char {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.result-item .q-reading {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+.result-item .q-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+}
+.result-item .q-status.ok { background: var(--badge-green); color: #fff; }
+.result-item .q-status.ng { background: var(--badge-red); color: #fff; }
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 200;
+  animation: confettiFall 1.2s ease-out forwards;
+}
+
+/* Animations */
+@keyframes bounceIn {
+  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(720deg); opacity: 0; }
+}
+
+body > * { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<div class="flash-overlay" id="flash"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading"><div class="spinner"></div>데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  var characters = DATA.characters || [];
+  var maxPlays = DATA.maxPlays || 3;
+  var showRowHint = DATA.showRowHint !== false;
+  var similarityThreshold = DATA.similarityThreshold || 60;
+  var totalChars = characters.length;
+  var currentIndex = 0;
+  var playsLeft = maxPlays;
+  var results = [];
+  var judged = false;
+
+  // TTS
+  var hasTTS = 'speechSynthesis' in window;
+  var jaVoices = [];
+  var selectedVoiceIdx = 0;
+  var isSpeaking = false;
+  var speakGen = 0;
+
+  // Canvas
+  var drawCanvas = null;
+  var drawCtx = null;
+  var isDrawing = false;
+  var lastX = 0;
+  var lastY = 0;
+  var hasDrawn = false;
+
+  // --- TTS Voice Setup (same as flashcard.html) ---
+  function sortVoices(voices) {
+    var preferred = ['kyoko', 'otoya', 'o-ren', 'hattori'];
+    voices.sort(function(a, b) {
+      var aLocal = a.localService ? 0 : 1;
+      var bLocal = b.localService ? 0 : 1;
+      if (aLocal !== bLocal) return aLocal - bLocal;
+      var aName = a.name.toLowerCase();
+      var bName = b.name.toLowerCase();
+      var aIdx = -1, bIdx = -1;
+      for (var i = 0; i < preferred.length; i++) {
+        if (aName.indexOf(preferred[i]) !== -1) { aIdx = i; break; }
+      }
+      for (var i = 0; i < preferred.length; i++) {
+        if (bName.indexOf(preferred[i]) !== -1) { bIdx = i; break; }
+      }
+      if (aIdx !== -1 && bIdx === -1) return -1;
+      if (aIdx === -1 && bIdx !== -1) return 1;
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      return aName.localeCompare(bName);
+    });
+    return voices;
+  }
+
+  function loadVoices() {
+    if (!hasTTS) return;
+    var all = speechSynthesis.getVoices();
+    jaVoices = all.filter(function(v) { return v.lang && v.lang.startsWith('ja'); });
+    if (jaVoices.length === 0) {
+      jaVoices = all.filter(function(v) { return v.lang && v.lang.indexOf('ja') !== -1; });
+    }
+    jaVoices = sortVoices(jaVoices);
+    if (DATA.preferredVoice && jaVoices.length > 0) {
+      var pref = DATA.preferredVoice.toLowerCase();
+      for (var i = 0; i < jaVoices.length; i++) {
+        if (jaVoices[i].name.toLowerCase().indexOf(pref) !== -1) { selectedVoiceIdx = i; break; }
+      }
+    }
+  }
+
+  function speakChar(char, countAgainstLimit) {
+    if (!hasTTS || !char) return;
+    speechSynthesis.cancel();
+    var gen = ++speakGen;
+    var u = new SpeechSynthesisUtterance(char);
+    u.lang = 'ja-JP';
+    u.rate = 0.8;
+    if (jaVoices.length > 0) u.voice = jaVoices[selectedVoiceIdx];
+    isSpeaking = true;
+    if (countAgainstLimit && playsLeft > 0) {
+      playsLeft--;
+      updatePlaysUI();
+    }
+    var btn = document.getElementById('btn-speak');
+    if (btn) btn.classList.add('speaking');
+    u.onend = function() {
+      if (gen !== speakGen) return;
+      isSpeaking = false;
+      var b = document.getElementById('btn-speak');
+      if (b) b.classList.remove('speaking');
+    };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+  }
+
+  if (hasTTS) {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    }
+    loadVoices();
+  }
+
+  function updatePlaysUI() {
+    var badge = document.getElementById('plays-badge');
+    if (badge) badge.textContent = '\uB0A8\uC740 \uC7AC\uC0DD: ' + playsLeft;
+    var btn = document.getElementById('btn-speak');
+    if (btn) {
+      if (playsLeft <= 0) {
+        btn.disabled = true;
+      }
+    }
+  }
+
+  // --- Canvas Drawing ---
+  function initCanvas() {
+    drawCanvas = document.getElementById('draw-canvas');
+    if (!drawCanvas) return;
+    drawCtx = drawCanvas.getContext('2d');
+    drawCtx.lineWidth = 6;
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+    drawCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#9B7FD4';
+
+    drawCanvas.addEventListener('pointerdown', onPointerDown);
+    drawCanvas.addEventListener('pointermove', onPointerMove);
+    drawCanvas.addEventListener('pointerup', onPointerUp);
+    drawCanvas.addEventListener('pointerleave', onPointerUp);
+  }
+
+  function getCanvasPos(e) {
+    var rect = drawCanvas.getBoundingClientRect();
+    var scaleX = drawCanvas.width / rect.width;
+    var scaleY = drawCanvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function onPointerDown(e) {
+    if (judged) return;
+    e.preventDefault();
+    drawCanvas.setPointerCapture(e.pointerId);
+    isDrawing = true;
+    hasDrawn = true;
+    var pos = getCanvasPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    drawCtx.beginPath();
+    drawCtx.moveTo(lastX, lastY);
+  }
+
+  function onPointerMove(e) {
+    if (!isDrawing || judged) return;
+    e.preventDefault();
+    var pos = getCanvasPos(e);
+    drawCtx.quadraticCurveTo(lastX, lastY, (lastX + pos.x) / 2, (lastY + pos.y) / 2);
+    drawCtx.stroke();
+    drawCtx.beginPath();
+    drawCtx.moveTo((lastX + pos.x) / 2, (lastY + pos.y) / 2);
+    lastX = pos.x;
+    lastY = pos.y;
+  }
+
+  function onPointerUp(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    drawCtx.beginPath();
+  }
+
+  function clearCanvas() {
+    if (!drawCtx) return;
+    drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    hasDrawn = false;
+  }
+
+  // --- Similarity Check ---
+  function renderAnswerToCanvas(char) {
+    var offscreen = document.createElement('canvas');
+    offscreen.width = 300;
+    offscreen.height = 300;
+    var ctx = offscreen.getContext('2d');
+
+    // Draw strokes if available
+    var strokes = char.strokes;
+    if (strokes && strokes.length > 0) {
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#000';
+      for (var s = 0; s < strokes.length; s++) {
+        var pts = strokes[s];
+        if (pts.length < 2) continue;
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pts[0][1]);
+        for (var p = 1; p < pts.length; p++) {
+          if (p < pts.length - 1) {
+            var midX = (pts[p][0] + pts[p + 1][0]) / 2;
+            var midY = (pts[p][1] + pts[p + 1][1]) / 2;
+            ctx.quadraticCurveTo(pts[p][0], pts[p][1], midX, midY);
+          } else {
+            ctx.lineTo(pts[p][0], pts[p][1]);
+          }
+        }
+        ctx.stroke();
+      }
+    } else {
+      // Fallback: draw the character as text
+      ctx.font = '200px "Zen Maru Gothic", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#000';
+      ctx.fillText(char.char, 150, 160);
+    }
+    return offscreen;
+  }
+
+  function computeSimilarity(char) {
+    var answerCanvas = renderAnswerToCanvas(char);
+    var ansCtx = answerCanvas.getContext('2d');
+    var ansData = ansCtx.getImageData(0, 0, 300, 300).data;
+    var userData = drawCtx.getImageData(0, 0, 300, 300).data;
+
+    var ansPixels = 0;
+    var userPixels = 0;
+    var overlap = 0;
+
+    for (var i = 3; i < ansData.length; i += 4) {
+      var aA = ansData[i] > 30;
+      var uA = userData[i] > 30;
+      if (aA) ansPixels++;
+      if (uA) userPixels++;
+      if (aA && uA) overlap++;
+    }
+
+    if (ansPixels === 0 && userPixels === 0) return 100;
+    if (ansPixels === 0 || userPixels === 0) return 0;
+
+    // Weighted overlap: considers both precision and recall
+    var recall = overlap / ansPixels;
+    var precision = overlap / userPixels;
+    if (precision + recall === 0) return 0;
+    var f1 = 2 * (precision * recall) / (precision + recall);
+    return Math.round(f1 * 100);
+  }
+
+  // --- Stroke animation ---
+  function animateStrokes(canvasEl, char) {
+    var ctx = canvasEl.getContext('2d');
+    var w = canvasEl.width;
+    var h = canvasEl.height;
+    var strokes = char.strokes;
+    ctx.clearRect(0, 0, w, h);
+
+    if (!strokes || strokes.length === 0) {
+      // Just show the character
+      ctx.font = '140px "Zen Maru Gothic", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#9B7FD4';
+      ctx.fillText(char.char, w / 2, h / 2 + 10);
+      return;
+    }
+
+    var scaleX = w / 300;
+    var scaleY = h / 300;
+    var strokeIdx = 0;
+    var ptIdx = 0;
+    var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#9B7FD4';
+
+    function drawNext() {
+      if (strokeIdx >= strokes.length) return;
+      var pts = strokes[strokeIdx];
+      if (pts.length < 2) { strokeIdx++; ptIdx = 0; drawNext(); return; }
+
+      ctx.lineWidth = 4 * scaleX;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = accentColor;
+      ctx.beginPath();
+      ctx.moveTo(pts[ptIdx][0] * scaleX, pts[ptIdx][1] * scaleY);
+
+      ptIdx++;
+      if (ptIdx < pts.length) {
+        ctx.lineTo(pts[ptIdx][0] * scaleX, pts[ptIdx][1] * scaleY);
+        ctx.stroke();
+        setTimeout(drawNext, 60);
+      } else {
+        ctx.stroke();
+        strokeIdx++;
+        ptIdx = 0;
+        setTimeout(drawNext, 300);
+      }
+    }
+
+    drawNext();
+  }
+
+  // --- Flash effect ---
+  function flashScreen(color) {
+    var el = document.getElementById('flash');
+    el.className = 'flash-overlay ' + color;
+    setTimeout(function() {
+      el.className = 'flash-overlay';
+    }, 400);
+  }
+
+  // --- Confetti ---
+  function spawnConfetti() {
+    var colors = ['#9B7FD4', '#F2A5B7', '#7EC8A8', '#F4B183', '#E88B8B'];
+    for (var i = 0; i < 30; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (Math.random() * 100) + 'vw';
+      piece.style.top = '-10px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.width = (6 + Math.random() * 8) + 'px';
+      piece.style.height = (6 + Math.random() * 8) + 'px';
+      piece.style.animationDuration = (0.8 + Math.random() * 0.8) + 's';
+      piece.style.animationDelay = (Math.random() * 0.4) + 's';
+      document.body.appendChild(piece);
+      setTimeout(function(el) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }.bind(null, piece), 2000);
+    }
+  }
+
+  // --- Render ---
+  function renderRound() {
+    judged = false;
+    hasDrawn = false;
+    playsLeft = maxPlays;
+    var char = characters[currentIndex];
+    var pct = ((currentIndex + 1) / totalChars * 100).toFixed(1);
+
+    var html = '';
+    html += '<div class="header">';
+    html += '<h1>\uD83C\uDFA7 \uB4E3\uACE0 \uADF8\uB9AC\uAE30</h1>';
+    html += '<div class="meta"><span>Tier ' + DATA.tier + ' \u00B7 ' + esc(DATA.tierName) + '</span>';
+    html += '<span>\uB77C\uC6B4\uB4DC ' + DATA.roundNumber + '/' + DATA.totalRounds + '</span></div>';
+    html += '</div>';
+
+    // Progress
+    html += '<div class="progress-wrap"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+
+    // TTS section
+    html += '<div class="tts-section">';
+    html += '<button class="btn-speak" id="btn-speak" aria-label="\uBC1C\uC74C \uB4E3\uAE30">\uD83D\uDD0A</button>';
+    html += '<div class="plays-badge" id="plays-badge">\uB0A8\uC740 \uC7AC\uC0DD: ' + playsLeft + '</div>';
+    if (showRowHint && char.row_hint) {
+      html += '<div class="row-hint">' + esc(char.row_hint) + '\uC774\uC5D0\uC694</div>';
+    }
+    html += '</div>';
+
+    // Canvas
+    html += '<div class="canvas-section">';
+    html += '<div class="canvas-wrap"><canvas id="draw-canvas" width="300" height="300"></canvas><div class="canvas-grid"></div></div>';
+    html += '<div class="btn-row">';
+    html += '<button class="btn btn-secondary" id="clearBtn">\uB2E4\uC2DC \uC4F0\uAE30</button>';
+    html += '<button class="btn btn-primary" id="judgeBtn">\uD310\uC815\uD558\uAE30</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Reveal (hidden initially)
+    html += '<div class="reveal-section" id="reveal">';
+    html += '<div class="reveal-char" id="reveal-char"></div>';
+    html += '<div class="reveal-reading" id="reveal-reading"></div>';
+    html += '<div class="reveal-score" id="reveal-score"></div>';
+    html += '<div class="stroke-anim-wrap"><canvas id="stroke-anim" width="200" height="200"></canvas></div>';
+    html += '<div class="btn-row" style="margin-top:16px">';
+    html += '<button class="btn btn-primary" id="nextBtn">\uB2E4\uC74C \u2192</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Counter
+    html += '<div style="text-align:center;margin-top:14px;font-family:var(--font-display);font-size:0.9rem;font-weight:700;color:var(--text-secondary);">';
+    html += (currentIndex + 1) + ' / ' + totalChars;
+    html += '</div>';
+
+    app.innerHTML = html;
+    initCanvas();
+    bindRoundEvents();
+  }
+
+  function bindRoundEvents() {
+    var speakBtn = document.getElementById('btn-speak');
+    if (speakBtn) {
+      speakBtn.addEventListener('click', function() {
+        if (playsLeft <= 0 && !judged) return;
+        var char = characters[currentIndex];
+        if (judged) {
+          speakChar(char.char, false);
+        } else {
+          speakChar(char.char, true);
+        }
+      });
+    }
+
+    var clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        if (!judged) clearCanvas();
+      });
+    }
+
+    var judgeBtn = document.getElementById('judgeBtn');
+    if (judgeBtn) {
+      judgeBtn.addEventListener('click', function() {
+        if (judged || !hasDrawn) return;
+        doJudge();
+      });
+    }
+
+    var nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', function() {
+        currentIndex++;
+        if (currentIndex >= totalChars) {
+          showResults();
+        } else {
+          renderRound();
+        }
+      });
+    }
+  }
+
+  function doJudge() {
+    judged = true;
+    var char = characters[currentIndex];
+    var score = computeSimilarity(char);
+    var passed = score >= similarityThreshold;
+
+    results.push({ char: char.char, reading: char.reading, score: score, passed: passed });
+
+    // Flash
+    flashScreen(passed ? 'green' : 'red');
+    if (passed) spawnConfetti();
+
+    // Show reveal
+    var reveal = document.getElementById('reveal');
+    var revealChar = document.getElementById('reveal-char');
+    var revealReading = document.getElementById('reveal-reading');
+    var revealScore = document.getElementById('reveal-score');
+
+    revealChar.textContent = char.char;
+    revealReading.textContent = char.reading;
+    revealScore.textContent = (passed ? '\uD569\uACA9' : '\uBD88\uD569\uACA9') + ' ' + score + '%';
+    revealScore.className = 'reveal-score ' + (passed ? 'pass' : 'fail');
+    reveal.classList.add('visible');
+
+    // Animate strokes
+    var animCanvas = document.getElementById('stroke-anim');
+    if (animCanvas) {
+      animateStrokes(animCanvas, char);
+    }
+
+    // Play TTS one more time (does not count)
+    speakChar(char.char, false);
+
+    // Disable drawing controls
+    var clearBtn = document.getElementById('clearBtn');
+    if (clearBtn) clearBtn.disabled = true;
+    var judgeBtn = document.getElementById('judgeBtn');
+    if (judgeBtn) judgeBtn.disabled = true;
+  }
+
+  function showResults() {
+    var passedCount = results.filter(function(r) { return r.passed; }).length;
+    var rate = Math.round((passedCount / totalChars) * 100);
+
+    var listHTML = results.map(function(r) {
+      var status = r.passed
+        ? '<span class="q-status ok">\uD569\uACA9 ' + r.score + '%</span>'
+        : '<span class="q-status ng">\uBD88\uD569\uACA9 ' + r.score + '%</span>';
+      return '<li class="result-item"><span><span class="q-char">' + esc(r.char) + '</span><span class="q-reading">' + esc(r.reading) + '</span></span>' + status + '</li>';
+    }).join('');
+
+    app.innerHTML = '<div class="result-screen visible">' +
+      '<div class="result-header">\uACB0\uACFC</div>' +
+      '<div class="result-score-main">' + passedCount + ' / ' + totalChars + ' \uD569\uACA9</div>' +
+      '<div class="result-rate">\uD569\uACA9\uB960 ' + rate + '%</div>' +
+      '<ul class="result-list">' + listHTML + '</ul>' +
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="retryBtn">\uB2E4\uC2DC \uD558\uAE30</button>' +
+      '</div>' +
+      '</div>';
+
+    document.getElementById('retryBtn').addEventListener('click', function() {
+      currentIndex = 0;
+      results = [];
+      renderRound();
+    });
+  }
+
+  function esc(str) {
+    if (str == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  // Start
+  renderRound();
+
+})();
+</script>
+</body>
+</html>

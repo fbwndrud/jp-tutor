@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스네이크 매치</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.header .sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Timer bar */
+.timer-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.timer-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: var(--radius-pill);
+  transition: width 0.3s linear;
+  width: 100%;
+}
+
+.timer-bar.warning { background: linear-gradient(90deg, var(--peach), var(--coral)); }
+.timer-bar.danger { background: var(--coral); }
+
+/* Status row */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.status-row .matched {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--mint);
+}
+
+.status-row .time-left {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.status-row .round-info {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Grid area */
+.grid-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  line-height: 1.2;
+  padding: 2px;
+  word-break: keep-all;
+}
+
+.cell:hover:not(.matched):not(.obstacle):not(.empty) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+  transform: scale(1.04);
+}
+
+.cell.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(155,127,212,0.3);
+  background: var(--accent-light);
+}
+
+.cell.matched {
+  background: rgba(126,200,168,0.15);
+  border-color: var(--mint);
+  color: var(--mint);
+  cursor: default;
+}
+
+.cell.obstacle {
+  background: var(--bg-sunken);
+  border-color: var(--border);
+  color: var(--text-muted);
+  cursor: default;
+  font-size: 1.1rem;
+}
+
+.cell.empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+}
+
+.cell.highlight {
+  box-shadow: 0 0 12px rgba(155,127,212,0.25);
+  border-color: var(--accent);
+}
+
+.cell.shake {
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* SVG overlay */
+.svg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.svg-overlay line.matched-line {
+  stroke: var(--mint);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+.svg-overlay line.preview-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.svg-overlay line.fail-line {
+  stroke: var(--coral);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.7;
+  animation: lineFade 0.5s ease forwards;
+}
+
+@keyframes lineFade {
+  0% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+/* Cross warning for path constraint */
+.cross-warning {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--coral);
+  color: white;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  animation: warnPop 1s ease forwards;
+}
+
+@keyframes warnPop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+  15% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.loading .spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Result screen */
+.result-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(74,68,88,0.5);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.result-overlay.show { display: flex; }
+
+.result-card {
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 32px 28px;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.result-card h2 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.result-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.result-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+}
+
+.result-stat .label { color: var(--text-secondary); }
+.result-stat .value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.result-pairs {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.result-pairs h3 {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.result-pair-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-pair-item:last-child { border-bottom: none; }
+
+.result-pair-item .icon { font-size: 1rem; }
+.result-pair-item .pair-text { color: var(--text); }
+.result-pair-item .pair-text span { color: var(--text-muted); margin: 0 4px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card" id="resultCard"></div>
+</div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  'use strict';
+
+  if (!DATA) {
+    document.getElementById('app').innerHTML =
+      '<div class="loading"><div class="spinner"></div>데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  const {
+    pairs,
+    gridSize,
+    timeLimit,
+    highlightFirst = 0,
+    pathConstraint = false,
+    obstacles = 0,
+    roundNumber = 1,
+    totalRounds = 1,
+    tierName = ''
+  } = DATA;
+
+  // State
+  let grid = [];            // 2D array of { type, pairIndex, side, text }
+  let selectedCell = null;   // { row, col }
+  let matchedPairs = new Set();
+  let matchedLines = [];     // [{ r1, c1, r2, c2 }]
+  let timerInterval = null;
+  let timeRemaining = timeLimit;
+  let startTime = Date.now();
+  let gameOver = false;
+
+  const N = gridSize;
+
+  // Build grid
+  function buildGrid() {
+    // Collect items: each pair has a and b
+    const items = [];
+    pairs.forEach((p, i) => {
+      items.push({ type: 'item', pairIndex: i, side: 'a', text: p.a });
+      items.push({ type: 'item', pairIndex: i, side: 'b', text: p.b });
+    });
+
+    const totalCells = N * N;
+    const obstacleCount = Math.min(obstacles, totalCells - items.length);
+
+    // Create flat grid
+    const flat = [];
+    // Place items
+    items.forEach(it => flat.push(it));
+    // Place obstacles
+    for (let i = 0; i < obstacleCount; i++) {
+      flat.push({ type: 'obstacle', text: '✕' });
+    }
+    // Fill remaining with empty
+    while (flat.length < totalCells) {
+      flat.push({ type: 'empty', text: '' });
+    }
+
+    // Shuffle
+    for (let i = flat.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [flat[i], flat[j]] = [flat[j], flat[i]];
+    }
+
+    // Convert to 2D
+    grid = [];
+    for (let r = 0; r < N; r++) {
+      grid.push([]);
+      for (let c = 0; c < N; c++) {
+        grid[r].push(flat[r * N + c]);
+      }
+    }
+  }
+
+  // Render
+  function render() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+      <div class="header">
+        <h1>🐍 스네이크 매치</h1>
+        <div class="sub">${tierName} · 라운드 ${roundNumber}/${totalRounds}</div>
+      </div>
+      <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+      <div class="status-row">
+        <div class="matched" id="matchCount">${matchedPairs.size} / ${pairs.length} 매치</div>
+        <div class="time-left" id="timeDisplay">${timeRemaining}초</div>
+      </div>
+      <div class="grid-area" id="gridArea">
+        <div class="grid" id="grid" style="grid-template-columns:repeat(${N},1fr)"></div>
+        <svg class="svg-overlay" id="svgOverlay"></svg>
+      </div>
+    `;
+
+    renderCells();
+    renderLines();
+    startTimer();
+  }
+
+  function renderCells() {
+    const gridEl = document.getElementById('grid');
+    gridEl.innerHTML = '';
+
+    for (let r = 0; r < N; r++) {
+      for (let c = 0; c < N; c++) {
+        const cell = grid[r][c];
+        const el = document.createElement('div');
+        el.className = 'cell';
+        el.dataset.row = r;
+        el.dataset.col = c;
+        el.textContent = cell.text;
+
+        if (cell.type === 'obstacle') {
+          el.classList.add('obstacle');
+        } else if (cell.type === 'empty') {
+          el.classList.add('empty');
+        } else {
+          // Check if matched
+          if (matchedPairs.has(cell.pairIndex)) {
+            el.classList.add('matched');
+          } else {
+            // Highlight first N pairs for beginners
+            if (highlightFirst > 0 && cell.pairIndex < highlightFirst && !matchedPairs.has(cell.pairIndex)) {
+              el.classList.add('highlight');
+            }
+            el.addEventListener('click', () => onCellClick(r, c));
+          }
+        }
+
+        // Selected
+        if (selectedCell && selectedCell.row === r && selectedCell.col === c) {
+          el.classList.add('selected');
+        }
+
+        gridEl.appendChild(el);
+      }
+    }
+  }
+
+  function getCellCenter(r, c) {
+    const gridEl = document.getElementById('grid');
+    const gridRect = gridEl.getBoundingClientRect();
+    const areaEl = document.getElementById('gridArea');
+    const areaRect = areaEl.getBoundingClientRect();
+
+    // Cells
+    const cells = gridEl.querySelectorAll('.cell');
+    const idx = r * N + c;
+    const cellEl = cells[idx];
+    if (!cellEl) return { x: 0, y: 0 };
+    const cellRect = cellEl.getBoundingClientRect();
+
+    return {
+      x: cellRect.left + cellRect.width / 2 - areaRect.left,
+      y: cellRect.top + cellRect.height / 2 - areaRect.top
+    };
+  }
+
+  function renderLines() {
+    const svg = document.getElementById('svgOverlay');
+    // Keep only matched lines, re-render after layout
+    requestAnimationFrame(() => {
+      svg.innerHTML = '';
+      matchedLines.forEach(ln => {
+        const p1 = getCellCenter(ln.r1, ln.c1);
+        const p2 = getCellCenter(ln.r2, ln.c2);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', p1.x);
+        line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x);
+        line.setAttribute('y2', p2.y);
+        line.classList.add('matched-line');
+        svg.appendChild(line);
+      });
+
+      // Preview line from selected cell to cursor? We'll skip dynamic hover for simplicity.
+    });
+  }
+
+  // Line intersection check (for pathConstraint)
+  function linesIntersect(a1, a2, b1, b2) {
+    // a1->a2 and b1->b2
+    function cross(o, a, b) {
+      return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+    }
+    function onSegment(p, q, r) {
+      return Math.min(p.x, r.x) <= q.x && q.x <= Math.max(p.x, r.x) &&
+             Math.min(p.y, r.y) <= q.y && q.y <= Math.max(p.y, r.y);
+    }
+    const d1 = cross(b1, b2, a1);
+    const d2 = cross(b1, b2, a2);
+    const d3 = cross(a1, a2, b1);
+    const d4 = cross(a1, a2, b2);
+
+    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
+        ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) return true;
+
+    if (d1 === 0 && onSegment(b1, a1, b2)) return true;
+    if (d2 === 0 && onSegment(b1, a2, b2)) return true;
+    if (d3 === 0 && onSegment(a1, b1, a2)) return true;
+    if (d4 === 0 && onSegment(a1, b2, a2)) return true;
+
+    return false;
+  }
+
+  function wouldCrossExistingLine(r1, c1, r2, c2) {
+    if (!pathConstraint) return false;
+    const newP1 = getCellCenter(r1, c1);
+    const newP2 = getCellCenter(r2, c2);
+
+    for (const ln of matchedLines) {
+      const p1 = getCellCenter(ln.r1, ln.c1);
+      const p2 = getCellCenter(ln.r2, ln.c2);
+      // Skip if they share an endpoint
+      if ((ln.r1 === r1 && ln.c1 === c1) || (ln.r1 === r2 && ln.c1 === c2) ||
+          (ln.r2 === r1 && ln.c2 === c1) || (ln.r2 === r2 && ln.c2 === c2)) continue;
+      if (linesIntersect(newP1, newP2, p1, p2)) return true;
+    }
+    return false;
+  }
+
+  function showCrossWarning() {
+    const area = document.getElementById('gridArea');
+    const warn = document.createElement('div');
+    warn.className = 'cross-warning';
+    warn.textContent = '선이 겹칠 수 없어요!';
+    area.appendChild(warn);
+    setTimeout(() => warn.remove(), 1000);
+  }
+
+  function onCellClick(r, c) {
+    if (gameOver) return;
+    const cell = grid[r][c];
+    if (cell.type !== 'item') return;
+    if (matchedPairs.has(cell.pairIndex)) return;
+
+    if (!selectedCell) {
+      // First selection
+      selectedCell = { row: r, col: c };
+      renderCells();
+      return;
+    }
+
+    // Same cell -> deselect
+    if (selectedCell.row === r && selectedCell.col === c) {
+      selectedCell = null;
+      renderCells();
+      return;
+    }
+
+    const first = grid[selectedCell.row][selectedCell.col];
+    const second = cell;
+
+    // Check if they form a valid pair
+    if (first.pairIndex === second.pairIndex && first.side !== second.side) {
+      // Check path constraint
+      if (wouldCrossExistingLine(selectedCell.row, selectedCell.col, r, c)) {
+        showCrossWarning();
+        selectedCell = null;
+        renderCells();
+        return;
+      }
+
+      // Match!
+      matchedPairs.add(first.pairIndex);
+      matchedLines.push({
+        r1: selectedCell.row, c1: selectedCell.col,
+        r2: r, c2: c
+      });
+      selectedCell = null;
+      updateMatchCount();
+      renderCells();
+      renderLines();
+
+      // Check win
+      if (matchedPairs.size === pairs.length) {
+        endGame(true);
+      }
+    } else {
+      // Failed match - show fail line and shake
+      showFailLine(selectedCell.row, selectedCell.col, r, c);
+      shakeCells(selectedCell.row, selectedCell.col, r, c);
+      selectedCell = null;
+      renderCells();
+    }
+  }
+
+  function showFailLine(r1, c1, r2, c2) {
+    requestAnimationFrame(() => {
+      const svg = document.getElementById('svgOverlay');
+      const p1 = getCellCenter(r1, c1);
+      const p2 = getCellCenter(r2, c2);
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', p1.x);
+      line.setAttribute('y1', p1.y);
+      line.setAttribute('x2', p2.x);
+      line.setAttribute('y2', p2.y);
+      line.classList.add('fail-line');
+      svg.appendChild(line);
+      setTimeout(() => line.remove(), 500);
+    });
+  }
+
+  function shakeCells(r1, c1, r2, c2) {
+    const gridEl = document.getElementById('grid');
+    const cells = gridEl.querySelectorAll('.cell');
+    [r1 * N + c1, r2 * N + c2].forEach(idx => {
+      const el = cells[idx];
+      if (el) {
+        el.classList.add('shake');
+        setTimeout(() => el.classList.remove('shake'), 400);
+      }
+    });
+  }
+
+  function updateMatchCount() {
+    const el = document.getElementById('matchCount');
+    if (el) el.textContent = `${matchedPairs.size} / ${pairs.length} 매치`;
+  }
+
+  // Timer
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeRemaining--;
+      updateTimerDisplay();
+      if (timeRemaining <= 0) {
+        endGame(false);
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const bar = document.getElementById('timerBar');
+    const display = document.getElementById('timeDisplay');
+    if (!bar || !display) return;
+
+    const pct = (timeRemaining / timeLimit) * 100;
+    bar.style.width = pct + '%';
+    display.textContent = timeRemaining + '초';
+
+    bar.classList.remove('warning', 'danger');
+    if (pct <= 20) bar.classList.add('danger');
+    else if (pct <= 40) bar.classList.add('warning');
+  }
+
+  function endGame(won) {
+    if (gameOver) return;
+    gameOver = true;
+    clearInterval(timerInterval);
+
+    const elapsed = Math.round((Date.now() - startTime) / 1000);
+    const matched = matchedPairs.size;
+    const total = pairs.length;
+
+    const overlay = document.getElementById('resultOverlay');
+    const card = document.getElementById('resultCard');
+
+    const pairResults = pairs.map((p, i) => {
+      const ok = matchedPairs.has(i);
+      return `<div class="result-pair-item">
+        <span class="icon">${ok ? '✅' : '❌'}</span>
+        <span class="pair-text">${p.a}<span>→</span>${p.b}</span>
+      </div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <h2>${won ? '🎉 완료!' : '⏰ 시간 초과!'}</h2>
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="label">매치</span>
+          <span class="value">${matched} / ${total}</span>
+        </div>
+        <div class="result-stat">
+          <span class="label">소요 시간</span>
+          <span class="value">${elapsed}초</span>
+        </div>
+        <div class="result-stat">
+          <span class="label">라운드</span>
+          <span class="value">${roundNumber} / ${totalRounds}</span>
+        </div>
+      </div>
+      <div class="result-pairs">
+        <h3>결과</h3>
+        ${pairResults}
+      </div>
+      <button class="btn btn-primary" id="retryBtn">다시 하기</button>
+    `;
+
+    overlay.classList.add('show');
+    document.getElementById('retryBtn').addEventListener('click', () => {
+      overlay.classList.remove('show');
+      resetGame();
+    });
+  }
+
+  function resetGame() {
+    matchedPairs.clear();
+    matchedLines = [];
+    selectedCell = null;
+    timeRemaining = timeLimit;
+    startTime = Date.now();
+    gameOver = false;
+    buildGrid();
+    render();
+  }
+
+  // Init
+  buildGrid();
+  render();
+
+})();
+</script>
+</body>
+</html>

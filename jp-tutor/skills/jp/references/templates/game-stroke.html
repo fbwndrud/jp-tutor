@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>따라쓰기 연습</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.container {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.header {
+  width: 100%;
+  text-align: center;
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.header .round-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.progress-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress-counter {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+.char-info {
+  text-align: center;
+  font-family: var(--font-display);
+}
+
+.char-reading {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.char-display {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.guide-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  transition: border-color 0.3s ease;
+}
+
+.canvas-wrap.pass-flash {
+  border-color: var(--mint);
+  box-shadow: 0 0 20px rgba(126,200,168,0.3);
+}
+
+.canvas-wrap.fail-flash {
+  border-color: var(--coral);
+  box-shadow: 0 0 20px rgba(232,139,139,0.3);
+}
+
+.canvas-wrap canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+}
+
+#guideCanvas { z-index: 1; pointer-events: none; }
+#drawCanvas { z-index: 2; }
+#animCanvas { z-index: 3; pointer-events: none; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 28px;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+
+.btn-accent:hover:not(:disabled) {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg-sunken);
+  color: var(--text-secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.result-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.result-badge.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.result-badge.pass {
+  background: rgba(126,200,168,0.15);
+  color: var(--badge-green);
+}
+
+.result-badge.fail {
+  background: rgba(232,139,139,0.15);
+  color: var(--badge-red);
+}
+
+.streak-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: var(--bg-elevated);
+  border: 3px solid var(--peach);
+  border-radius: var(--radius);
+  padding: 24px 36px;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--peach);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  text-align: center;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  opacity: 0;
+}
+
+.streak-popup.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.final-screen {
+  width: 100%;
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.final-screen.show {
+  display: flex;
+}
+
+.final-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.final-stats {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.final-rate {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--mint);
+}
+
+.game-area { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.game-area.hidden { display: none; }
+
+.loading {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text-muted);
+  padding: 40px 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>따라쓰기 연습</h1>
+    <div class="round-info" id="roundInfo"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <span class="progress-counter" id="progressCounter">0/0</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <div class="char-info">
+      <div class="char-display" id="charDisplay"></div>
+      <div class="char-reading" id="charReading"></div>
+      <div class="guide-label" id="guideLabel"></div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="guideCanvas" width="300" height="300"></canvas>
+      <canvas id="drawCanvas" width="300" height="300"></canvas>
+      <canvas id="animCanvas" width="300" height="300"></canvas>
+    </div>
+
+    <div class="result-badge" id="resultBadge"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btnReset">다시 쓰기</button>
+      <button class="btn btn-accent" id="btnJudge">판정하기</button>
+    </div>
+  </div>
+
+  <div class="final-screen" id="finalScreen">
+    <div class="final-title">연습 완료!</div>
+    <div class="final-stats" id="finalStats"></div>
+    <div class="final-rate" id="finalRate"></div>
+    <button class="btn btn-accent" id="btnRetry">다시 하기</button>
+  </div>
+
+  <div class="loading" id="loading">데이터를 불러오는 중...</div>
+</div>
+
+<div class="streak-popup" id="streakPopup"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  'use strict';
+
+  if (!DATA) {
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('gameArea').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'none';
+
+  var characters = DATA.characters || [];
+  var guideMode = DATA.guideMode || 'dotted';
+  var similarityThreshold = DATA.similarityThreshold || 60;
+  var showPreviewTime = DATA.showPreviewTime != null ? DATA.showPreviewTime : -1;
+  var roundNumber = DATA.roundNumber || 1;
+  var totalRounds = DATA.totalRounds || 1;
+
+  var currentIndex = 0;
+  var passCount = 0;
+  var streak = 0;
+  var isDrawing = false;
+  var userStrokes = [];
+  var currentStroke = [];
+  var judged = false;
+  var previewTimer = null;
+
+  var drawCanvas = document.getElementById('drawCanvas');
+  var drawCtx = drawCanvas.getContext('2d');
+  var guideCanvas = document.getElementById('guideCanvas');
+  var guideCtx = guideCanvas.getContext('2d');
+  var animCanvas = document.getElementById('animCanvas');
+  var animCtx = animCanvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+
+  var btnReset = document.getElementById('btnReset');
+  var btnJudge = document.getElementById('btnJudge');
+  var resultBadge = document.getElementById('resultBadge');
+  var streakPopup = document.getElementById('streakPopup');
+
+  // Hidden answer canvas
+  var answerCanvas = document.createElement('canvas');
+  answerCanvas.width = 300;
+  answerCanvas.height = 300;
+  var answerCtx = answerCanvas.getContext('2d');
+
+  if (totalRounds > 1) {
+    document.getElementById('roundInfo').textContent = 'Round ' + roundNumber + ' / ' + totalRounds;
+  }
+
+  function updateProgress() {
+    var total = characters.length;
+    document.getElementById('progressCounter').textContent = currentIndex + '/' + total;
+    document.getElementById('progressFill').style.width = (total > 0 ? (currentIndex / total * 100) : 0) + '%';
+  }
+
+  function getGuideLabel() {
+    switch (guideMode) {
+      case 'dotted': return '점선 가이드';
+      case 'translucent': return '반투명 가이드';
+      case 'blank': return '빈 캔버스';
+      case 'memory': return '기억해서 쓰기';
+      default: return '';
+    }
+  }
+
+  function drawStrokesOnCtx(ctx, strokes, opts) {
+    opts = opts || {};
+    var color = opts.color || 'rgba(0,0,0,0.8)';
+    var lineWidth = opts.lineWidth || 6;
+    var dash = opts.dash || [];
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash(dash);
+
+    for (var s = 0; s < strokes.length; s++) {
+      var pts = strokes[s];
+      if (pts.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (var p = 1; p < pts.length; p++) {
+        if (p < pts.length - 1) {
+          var mx = (pts[p][0] + pts[p+1][0]) / 2;
+          var my = (pts[p][1] + pts[p+1][1]) / 2;
+          ctx.quadraticCurveTo(pts[p][0], pts[p][1], mx, my);
+        } else {
+          ctx.lineTo(pts[p][0], pts[p][1]);
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }
+
+  function drawGuide(charData) {
+    guideCtx.clearRect(0, 0, 300, 300);
+
+    // Draw grid lines
+    guideCtx.strokeStyle = 'rgba(200,190,220,0.2)';
+    guideCtx.lineWidth = 1;
+    guideCtx.setLineDash([4, 4]);
+    guideCtx.beginPath();
+    guideCtx.moveTo(150, 0); guideCtx.lineTo(150, 300);
+    guideCtx.moveTo(0, 150); guideCtx.lineTo(300, 150);
+    guideCtx.stroke();
+    guideCtx.setLineDash([]);
+
+    if (guideMode === 'dotted') {
+      drawStrokesOnCtx(guideCtx, charData.strokes, {
+        color: 'rgba(180,170,200,0.4)',
+        lineWidth: 6,
+        dash: [3, 8]
+      });
+      // Numbered circles at stroke starts
+      for (var s = 0; s < charData.strokes.length; s++) {
+        var pts = charData.strokes[s];
+        if (pts.length === 0) continue;
+        var x = pts[0][0], y = pts[0][1];
+        guideCtx.beginPath();
+        guideCtx.arc(x, y, 10, 0, Math.PI * 2);
+        guideCtx.fillStyle = 'rgba(155,127,212,0.25)';
+        guideCtx.fill();
+        guideCtx.fillStyle = 'rgba(155,127,212,0.6)';
+        guideCtx.font = '700 11px ' + getComputedStyle(document.body).getPropertyValue('--font-display');
+        guideCtx.textAlign = 'center';
+        guideCtx.textBaseline = 'middle';
+        guideCtx.fillText(String(s + 1), x, y);
+      }
+    } else if (guideMode === 'translucent') {
+      drawStrokesOnCtx(guideCtx, charData.strokes, {
+        color: 'rgba(155,127,212,0.15)',
+        lineWidth: 8
+      });
+    }
+    // blank and memory: no guide strokes
+  }
+
+  function loadCharacter() {
+    if (currentIndex >= characters.length) {
+      showFinal();
+      return;
+    }
+
+    judged = false;
+    userStrokes = [];
+    currentStroke = [];
+
+    drawCtx.clearRect(0, 0, 300, 300);
+    animCtx.clearRect(0, 0, 300, 300);
+    resultBadge.classList.remove('show');
+    canvasWrap.classList.remove('pass-flash', 'fail-flash');
+    btnJudge.textContent = '판정하기';
+    btnJudge.disabled = false;
+    btnReset.disabled = false;
+
+    var charData = characters[currentIndex];
+
+    // Character info
+    if (guideMode === 'memory') {
+      document.getElementById('charDisplay').textContent = '?';
+    } else {
+      document.getElementById('charDisplay').textContent = charData.char;
+    }
+    document.getElementById('charReading').textContent = charData.reading;
+    document.getElementById('guideLabel').textContent = getGuideLabel();
+
+    updateProgress();
+
+    if (showPreviewTime > 0) {
+      // Show character briefly, then fade
+      drawGuide(charData);
+      guideCanvas.style.opacity = '1';
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = setTimeout(function() {
+        guideCanvas.style.transition = 'opacity 0.5s ease';
+        guideCanvas.style.opacity = '0';
+        setTimeout(function() {
+          guideCtx.clearRect(0, 0, 300, 300);
+          guideCanvas.style.opacity = '1';
+          guideCanvas.style.transition = '';
+          // Draw grid only
+          drawGridOnly();
+        }, 500);
+      }, showPreviewTime * 1000);
+    } else {
+      // Keep guide visible
+      drawGuide(charData);
+    }
+  }
+
+  function drawGridOnly() {
+    guideCtx.clearRect(0, 0, 300, 300);
+    guideCtx.strokeStyle = 'rgba(200,190,220,0.2)';
+    guideCtx.lineWidth = 1;
+    guideCtx.setLineDash([4, 4]);
+    guideCtx.beginPath();
+    guideCtx.moveTo(150, 0); guideCtx.lineTo(150, 300);
+    guideCtx.moveTo(0, 150); guideCtx.lineTo(300, 150);
+    guideCtx.stroke();
+    guideCtx.setLineDash([]);
+  }
+
+  // Pointer events
+  function getPos(e) {
+    var rect = drawCanvas.getBoundingClientRect();
+    var scaleX = 300 / rect.width;
+    var scaleY = 300 / rect.height;
+    return [
+      (e.clientX - rect.left) * scaleX,
+      (e.clientY - rect.top) * scaleY
+    ];
+  }
+
+  function onPointerDown(e) {
+    if (judged) return;
+    e.preventDefault();
+    isDrawing = true;
+    currentStroke = [getPos(e)];
+    drawCtx.beginPath();
+    drawCtx.moveTo(currentStroke[0][0], currentStroke[0][1]);
+  }
+
+  function onPointerMove(e) {
+    if (!isDrawing || judged) return;
+    e.preventDefault();
+    var pos = getPos(e);
+    currentStroke.push(pos);
+
+    // Draw smooth line
+    drawCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    drawCtx.lineWidth = 6;
+    drawCtx.lineCap = 'round';
+    drawCtx.lineJoin = 'round';
+
+    if (currentStroke.length >= 3) {
+      var l = currentStroke.length;
+      var p0 = currentStroke[l - 3];
+      var p1 = currentStroke[l - 2];
+      var p2 = currentStroke[l - 1];
+      var mx = (p1[0] + p2[0]) / 2;
+      var my = (p1[1] + p2[1]) / 2;
+      drawCtx.beginPath();
+      drawCtx.moveTo((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2);
+      drawCtx.quadraticCurveTo(p1[0], p1[1], mx, my);
+      drawCtx.stroke();
+    } else if (currentStroke.length === 2) {
+      drawCtx.beginPath();
+      drawCtx.moveTo(currentStroke[0][0], currentStroke[0][1]);
+      drawCtx.lineTo(pos[0], pos[1]);
+      drawCtx.stroke();
+    }
+  }
+
+  function onPointerUp(e) {
+    if (!isDrawing || judged) return;
+    isDrawing = false;
+    if (currentStroke.length > 1) {
+      userStrokes.push(currentStroke.slice());
+    }
+    currentStroke = [];
+  }
+
+  drawCanvas.addEventListener('pointerdown', onPointerDown);
+  drawCanvas.addEventListener('pointermove', onPointerMove);
+  drawCanvas.addEventListener('pointerup', onPointerUp);
+  drawCanvas.addEventListener('pointerleave', onPointerUp);
+  drawCanvas.addEventListener('pointercancel', onPointerUp);
+
+  // Reset button
+  btnReset.addEventListener('click', function() {
+    if (judged) return;
+    drawCtx.clearRect(0, 0, 300, 300);
+    userStrokes = [];
+    currentStroke = [];
+  });
+
+  // Judge button (doubles as next button)
+  btnJudge.addEventListener('click', function() {
+    if (judged) {
+      // Move to next character
+      currentIndex++;
+      loadCharacter();
+      return;
+    }
+
+    if (userStrokes.length === 0) return;
+
+    judged = true;
+    btnReset.disabled = true;
+
+    var charData = characters[currentIndex];
+    var similarity = calcSimilarity(charData.strokes, userStrokes);
+    var passed = similarity >= similarityThreshold;
+
+    // Show result
+    resultBadge.className = 'result-badge ' + (passed ? 'pass' : 'fail');
+    resultBadge.textContent = (passed ? '합격' : '불합격') + ' ' + similarity + '%';
+    setTimeout(function() { resultBadge.classList.add('show'); }, 50);
+
+    if (passed) {
+      passCount++;
+      streak++;
+      canvasWrap.classList.add('pass-flash');
+
+      // Show reading prominently
+      if (guideMode === 'memory') {
+        document.getElementById('charDisplay').textContent = charData.char;
+      }
+
+      // Streak bonus
+      if (streak > 0 && streak % 10 === 0) {
+        showStreakPopup(streak);
+      }
+    } else {
+      streak = 0;
+      canvasWrap.classList.add('fail-flash');
+      // Show answer animation
+      animateAnswer(charData.strokes);
+    }
+
+    btnJudge.textContent = currentIndex < characters.length - 1 ? '다음' : '결과 보기';
+  });
+
+  function calcSimilarity(answerStrokes, drawnStrokes) {
+    // Draw answer on hidden canvas
+    answerCtx.clearRect(0, 0, 300, 300);
+    drawStrokesOnCtx(answerCtx, answerStrokes, {
+      color: 'rgba(0,0,0,1)',
+      lineWidth: 6
+    });
+    var answerData = answerCtx.getImageData(0, 0, 300, 300).data;
+
+    // Draw user strokes on a temp canvas
+    var tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 300;
+    tempCanvas.height = 300;
+    var tempCtx = tempCanvas.getContext('2d');
+    drawStrokesOnCtx(tempCtx, drawnStrokes, {
+      color: 'rgba(0,0,0,1)',
+      lineWidth: 6
+    });
+    var drawnData = tempCtx.getImageData(0, 0, 300, 300).data;
+
+    var answerPixels = 0;
+    var overlapPixels = 0;
+
+    for (var i = 3; i < answerData.length; i += 4) {
+      var aAlpha = answerData[i];
+      var dAlpha = drawnData[i];
+      if (aAlpha > 128) {
+        answerPixels++;
+        if (dAlpha > 128) {
+          overlapPixels++;
+        }
+      }
+    }
+
+    if (answerPixels === 0) return 100;
+    return Math.round(overlapPixels / answerPixels * 100);
+  }
+
+  function animateAnswer(strokes) {
+    animCtx.clearRect(0, 0, 300, 300);
+    var totalPoints = 0;
+    for (var s = 0; s < strokes.length; s++) totalPoints += strokes[s].length;
+    if (totalPoints === 0) return;
+
+    var frameDuration = 1000 / totalPoints; // 1s total
+    var strokeIdx = 0;
+    var pointIdx = 0;
+
+    animCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--coral').trim();
+    animCtx.lineWidth = 5;
+    animCtx.lineCap = 'round';
+    animCtx.lineJoin = 'round';
+
+    function drawNext() {
+      if (strokeIdx >= strokes.length) return;
+
+      var pts = strokes[strokeIdx];
+      if (pointIdx === 0) {
+        animCtx.beginPath();
+        animCtx.moveTo(pts[0][0], pts[0][1]);
+        pointIdx = 1;
+      }
+
+      if (pointIdx < pts.length) {
+        var prev = pts[pointIdx - 1];
+        var curr = pts[pointIdx];
+        if (pointIdx < pts.length - 1) {
+          var next = pts[pointIdx + 1];
+          var mx = (curr[0] + next[0]) / 2;
+          var my = (curr[1] + next[1]) / 2;
+          animCtx.quadraticCurveTo(curr[0], curr[1], mx, my);
+        } else {
+          animCtx.lineTo(curr[0], curr[1]);
+        }
+        animCtx.stroke();
+        // Re-begin path from last drawn point for continuous stroke
+        animCtx.beginPath();
+        if (pointIdx < pts.length - 1) {
+          var nx = pts[pointIdx + 1];
+          var mx2 = (curr[0] + (nx ? nx[0] : curr[0])) / 2;
+          var my2 = (curr[1] + (nx ? nx[1] : curr[1])) / 2;
+          animCtx.moveTo(mx2, my2);
+        }
+        pointIdx++;
+        setTimeout(drawNext, frameDuration);
+      } else {
+        // Next stroke
+        strokeIdx++;
+        pointIdx = 0;
+        setTimeout(drawNext, frameDuration * 2); // Small pause between strokes
+      }
+    }
+
+    drawNext();
+  }
+
+  function showStreakPopup(count) {
+    streakPopup.textContent = count + '연속 합격! \u{1F31F}';
+    streakPopup.classList.add('show');
+    setTimeout(function() {
+      streakPopup.classList.remove('show');
+    }, 2000);
+  }
+
+  function showFinal() {
+    document.getElementById('gameArea').classList.add('hidden');
+    var finalScreen = document.getElementById('finalScreen');
+    finalScreen.classList.add('show');
+
+    var total = characters.length;
+    var rate = total > 0 ? Math.round(passCount / total * 100) : 0;
+
+    document.getElementById('finalStats').innerHTML =
+      '총 <strong>' + total + '</strong>자 중 <strong>' + passCount + '</strong>자 합격';
+    document.getElementById('finalRate').textContent = rate + '%';
+
+    document.getElementById('progressCounter').textContent = total + '/' + total;
+    document.getElementById('progressFill').style.width = '100%';
+  }
+
+  document.getElementById('btnRetry').addEventListener('click', function() {
+    currentIndex = 0;
+    passCount = 0;
+    streak = 0;
+    document.getElementById('finalScreen').classList.remove('show');
+    document.getElementById('gameArea').classList.remove('hidden');
+    loadCharacter();
+  });
+
+  // Start
+  loadCharacter();
+})();
+</script>
+</body>
+</html>
