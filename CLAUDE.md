@@ -35,12 +35,13 @@
 
 ### 5. HTML 템플릿 간 디자인 토큰 통일
 - CSS 변수 (--bg, --radius, --shadow 등)는 4개 템플릿 모두 동일하게 유지
-- 디자인 테마: "Wabi-Sabi Digital" — 일본 잉크 & 종이 미학
-- Display 폰트: `'Shippori Mincho', serif` (일본어 제목/카나 표시용)
+- 디자인 테마: "Kawaii Stationery" (카와이 문구점) — 부드러운 파스텔, 둥근 모양, 친근한 느낌
+- Display 폰트: `'Zen Maru Gothic', sans-serif` (둥글고 귀여운 일본어 폰트)
 - Body 폰트: `'Noto Sans JP', sans-serif`
-- Google Fonts CDN: `Shippori+Mincho:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;600;700`
-- 핵심 색상: paper `#F5F0E8`, ink `#2C2C2C`, accent `#3D5A80`, vermillion `#C1440E`
-- 배경 텍스처: SVG fractal noise grain overlay (--grain 변수)
+- Google Fonts CDN: `Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700`
+- 핵심 색상: bg `#FBF7FF`, text `#4A4458`, accent `#9B7FD4`, pink `#F2A5B7`, mint `#7EC8A8`, peach `#F4B183`
+- 배경: radial-gradient (보라+핑크 은은한 그라데이션, grain 없음)
+- border-radius: 카드 20px, 작은 요소 14px, 버튼 pill(999px)
 - 새 템플릿 추가 시 기존 디자인 토큰 복사해서 시작
 
 ## 프로젝트 구조
