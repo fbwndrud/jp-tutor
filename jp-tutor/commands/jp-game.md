@@ -55,10 +55,14 @@ stats가 없으면 tier 1로 시작합니다.
 - 70%: 시스템 추천 (복습 대상, 약점 개념 우선)
 - 30%: 현재 레벨 커리큘럼의 적절한 개념
 
-### HTML 게임 렌더링
-해당 게임의 HTML 템플릿을 읽어 DATA를 주입하고 렌더링합니다.
-- 템플릿 경로: `skills/jp/references/templates/game-{key}.html`
-- DATA 주입 패턴: `const DATA = null;` → `const DATA = { ... };`
+### ⚠️ HTML 게임 렌더링 — 반드시 실행
+
+**반드시 게임 HTML 파일을 생성하고 유저가 브라우저에서 플레이하도록 합니다.**
+1. `skills/jp/references/templates/game-{key}.html` 템플릿을 읽습니다.
+2. `const DATA = null;` 을 실제 게임 데이터로 치환합니다.
+3. `jp-data/game.html`로 저장합니다.
+4. "게임이 준비됐습니다! `jp-data/game.html`을 브라우저에서 열어주세요" 안내합니다.
+5. **텍스트로 게임을 진행하지 마세요. 반드시 HTML 파일을 생성해야 합니다.**
 
 ### DATA 구조 (공통)
 ```json
