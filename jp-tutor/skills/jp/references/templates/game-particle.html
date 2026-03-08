@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조사 배틀</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #FBF7FF;
+  --bg-elevated: #FFFFFF;
+  --bg-sunken: #F3EEFF;
+  --bg-card-back: #FFF8FC;
+  --text: #4A4458;
+  --text-secondary: #8B82A0;
+  --text-muted: #B5AECA;
+  --border: #E8E0F4;
+  --accent: #9B7FD4;
+  --accent-hover: #8A6BC4;
+  --accent-light: #F3EEFF;
+  --pink: #F2A5B7;
+  --mint: #7EC8A8;
+  --peach: #F4B183;
+  --coral: #E88B8B;
+  --badge-green: #7EC8A8;
+  --badge-yellow: #F4B183;
+  --badge-red: #E88B8B;
+  --badge-gray: #CAC3D8;
+  --shadow: 0 4px 16px rgba(155,127,212,0.1), 0 1px 4px rgba(155,127,212,0.06);
+  --shadow-lg: 0 8px 32px rgba(155,127,212,0.14), 0 2px 8px rgba(155,127,212,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --font-display: 'Zen Maru Gothic', sans-serif;
+  --font-body: 'Noto Sans JP', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1E1B2E;
+    --bg-elevated: #2A2640;
+    --bg-sunken: #16142A;
+    --bg-card-back: #2E2848;
+    --text: #E8E2F4;
+    --text-secondary: #A99FC0;
+    --text-muted: #756B90;
+    --border: #3D3658;
+    --accent: #B9A0E8;
+    --accent-hover: #CDBAF0;
+    --accent-light: #2A2640;
+    --pink: #E8899E;
+    --mint: #6DB894;
+    --peach: #E0A070;
+    --coral: #D47878;
+    --badge-green: #6DB894;
+    --badge-yellow: #E0A070;
+    --badge-red: #D47878;
+    --badge-gray: #5A5370;
+    --shadow: 0 4px 16px rgba(0,0,0,0.25), 0 1px 4px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+  }
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 30% 20%, rgba(155,127,212,0.06) 0%, transparent 50%),
+                    radial-gradient(ellipse at 70% 80%, rgba(242,165,183,0.05) 0%, transparent 50%);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+}
+
+/* Top bar */
+.topbar {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.topbar-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.topbar-info strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, var(--peach), var(--pink));
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(244,177,131,0.3);
+}
+
+.streak-badge.hidden { display: none; }
+
+/* Timer bar */
+.timer-wrap {
+  width: 100%;
+  max-width: 500px;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.timer-wrap.hidden { display: none; }
+
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--mint), var(--accent));
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+.timer-fill.warning { background: linear-gradient(90deg, var(--peach), var(--coral)); }
+
+/* Progress bar */
+.progress-wrap {
+  width: 100%;
+  max-width: 500px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--pink));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  width: 100%;
+  max-width: 500px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+/* Sentence card */
+.sentence-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--border);
+  padding: 36px 28px 28px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sentence-card::before {
+  content: '\273F';
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  font-size: 0.8rem;
+  color: var(--pink);
+  opacity: 0.4;
+}
+
+.sentence-card::after {
+  content: '\273F';
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  font-size: 0.8rem;
+  color: var(--accent);
+  opacity: 0.35;
+}
+
+.sentence-flow {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 2.2;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.blank-box {
+  display: inline-block;
+  min-width: 56px;
+  padding: 2px 10px;
+  border: 2.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-sunken);
+  text-align: center;
+  vertical-align: baseline;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: default;
+  position: relative;
+}
+
+.blank-box.active {
+  border-color: var(--accent);
+  border-style: solid;
+  background: var(--accent-light);
+  box-shadow: 0 0 0 4px rgba(155,127,212,0.12);
+}
+
+.blank-box.correct {
+  border-color: var(--mint);
+  border-style: solid;
+  background: rgba(126,200,168,0.12);
+  color: var(--badge-green);
+  animation: blankCorrect 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.blank-box.wrong {
+  border-color: var(--coral);
+  border-style: solid;
+  background: rgba(232,139,139,0.12);
+  color: var(--badge-red);
+  animation: blankShake 0.4s ease;
+}
+
+.blank-box.filled {
+  border-style: solid;
+  border-color: var(--border);
+  background: var(--bg-sunken);
+  color: var(--text);
+}
+
+@keyframes blankCorrect {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes blankShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Translation */
+.translation {
+  margin-top: 16px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.translation.visible { opacity: 1; }
+
+/* Explanation tooltip */
+.explanation-card {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-card-back);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.5;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.explanation-card .exp-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+}
+
+.explanation-card.hidden { display: none; }
+
+@keyframes fadeSlideIn {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Choices */
+.choices-area {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.btn-choice {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 10px 24px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 72px;
+  text-align: center;
+  position: relative;
+}
+
+.btn-choice:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-choice:active { transform: scale(0.95); }
+
+.btn-choice.selected {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(155,127,212,0.25);
+}
+
+.btn-choice.correct-flash {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(126,200,168,0.3);
+}
+
+.btn-choice.wrong-flash {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(232,139,139,0.3);
+}
+
+.btn-choice .key-hint {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 0.58rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+}
+
+.btn-choice:disabled {
+  opacity: 0.4;
+  cursor: default;
+  transform: none;
+}
+
+/* Input mode */
+.input-area {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.input-particle {
+  padding: 10px 18px;
+  font-size: 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-align: center;
+  width: 120px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-particle:focus { border-color: var(--accent); }
+
+.btn-submit {
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 14px rgba(155,127,212,0.25);
+}
+
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(155,127,212,0.3); }
+
+/* XP popup */
+.xp-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--peach);
+  pointer-events: none;
+  animation: xpPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 100;
+  text-shadow: 0 2px 8px rgba(244,177,131,0.3);
+}
+
+@keyframes xpPop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  30% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+  60% { opacity: 1; transform: translate(-50%, -70%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(0.8); }
+}
+
+/* Slide transitions */
+.slide-enter {
+  animation: slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.slide-exit {
+  animation: slideOut 0.2s ease forwards;
+}
+
+@keyframes slideOut {
+  0% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(-30px); }
+}
+
+/* Results */
+.results {
+  width: 100%;
+  max-width: 500px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 36px 28px;
+  text-align: center;
+  border: 1.5px solid var(--border);
+  animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.results h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.results .accuracy {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+
+.results .xp-total {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--peach);
+  margin-bottom: 24px;
+}
+
+.result-list {
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 0.85rem;
+}
+
+.result-item:last-child { border-bottom: none; }
+
+.result-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.result-sentence {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 500;
+}
+
+.result-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-restart {
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 13px 32px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 14px rgba(155,127,212,0.25);
+}
+
+.btn-restart:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 20px rgba(155,127,212,0.3); }
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+  60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body > * { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+@media (max-width: 520px) {
+  .sentence-flow { font-size: 1.4rem; }
+  .btn-choice { padding: 8px 18px; font-size: 0.95rem; min-width: 60px; }
+  .sentence-card { padding: 28px 20px 22px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const DATA = null;
+
+;(function() {
+  var app = document.getElementById('app');
+
+  if (!DATA) {
+    app.innerHTML = '<div class="loading" role="status" aria-label="로딩 중">데이터를 불러오는 중...</div>';
+    return;
+  }
+
+  var problems = DATA.problems.slice();
+  var currentProblem = 0;
+  var currentBlank = 0;
+  var streak = 0;
+  var totalCorrect = 0;
+  var totalBlanks = 0;
+  var xpEarned = 0;
+  var finished = false;
+  var explanationTimer = null;
+  var showingExplanation = false;
+  var timerInterval = null;
+  var timerRemaining = 0;
+  var transitioning = false;
+
+  // Per-problem results: array of { sentence, translation, blanks: [{ answer, userAnswer, correct }] }
+  var problemResults = [];
+
+  // Count total blanks
+  for (var i = 0; i < problems.length; i++) {
+    totalBlanks += problems[i].blanks.length;
+  }
+
+  // Initialize blank states for each problem
+  var blankStates = []; // [problemIdx][blankIdx] = { answered: false, correct: false, userAnswer: '' }
+  for (var i = 0; i < problems.length; i++) {
+    blankStates[i] = [];
+    for (var j = 0; j < problems[i].blanks.length; j++) {
+      blankStates[i][j] = { answered: false, correct: false, userAnswer: '', animClass: '' };
+    }
+  }
+
+  function esc(str) {
+    if (str == null) return '';
+    var d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+
+  function countAnswered() {
+    var c = 0;
+    for (var i = 0; i < blankStates.length; i++) {
+      for (var j = 0; j < blankStates[i].length; j++) {
+        if (blankStates[i][j].answered) c++;
+      }
+    }
+    return c;
+  }
+
+  function showXpPopup(text) {
+    var el = document.createElement('div');
+    el.className = 'xp-popup';
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 1300);
+  }
+
+  function startTimer() {
+    if (DATA.timePerProblem <= 0) return;
+    clearInterval(timerInterval);
+    timerRemaining = DATA.timePerProblem;
+    timerInterval = setInterval(function() {
+      timerRemaining -= 0.1;
+      if (timerRemaining <= 0) {
+        timerRemaining = 0;
+        clearInterval(timerInterval);
+        // Time up — mark remaining blanks as wrong
+        var prob = problems[currentProblem];
+        for (var b = currentBlank; b < prob.blanks.length; b++) {
+          if (!blankStates[currentProblem][b].answered) {
+            blankStates[currentProblem][b].answered = true;
+            blankStates[currentProblem][b].correct = false;
+            blankStates[currentProblem][b].userAnswer = '(시간 초과)';
+            streak = 0;
+          }
+        }
+        goNextProblem();
+      }
+      updateTimerBar();
+    }, 100);
+  }
+
+  function updateTimerBar() {
+    var fill = document.querySelector('.timer-fill');
+    if (!fill) return;
+    var pct = (timerRemaining / DATA.timePerProblem) * 100;
+    fill.style.width = pct + '%';
+    if (pct < 30) fill.classList.add('warning');
+    else fill.classList.remove('warning');
+  }
+
+  function goNextProblem() {
+    // Save results for current problem
+    saveProblemResult(currentProblem);
+
+    // Show translation before moving
+    var trans = document.querySelector('.translation');
+    if (trans) trans.classList.add('visible');
+
+    clearInterval(timerInterval);
+
+    setTimeout(function() {
+      if (currentProblem < problems.length - 1) {
+        currentProblem++;
+        currentBlank = 0;
+        transitioning = true;
+        render();
+        setTimeout(function() { transitioning = false; }, 350);
+      } else {
+        finished = true;
+        render();
+      }
+    }, 1200);
+  }
+
+  function saveProblemResult(probIdx) {
+    var prob = problems[probIdx];
+    var res = { sentence: prob.sentence, translation: prob.translation, blanks: [] };
+    for (var j = 0; j < prob.blanks.length; j++) {
+      res.blanks.push({
+        answer: prob.blanks[j].answer,
+        userAnswer: blankStates[probIdx][j].userAnswer,
+        correct: blankStates[probIdx][j].correct
+      });
+    }
+    problemResults[probIdx] = res;
+  }
+
+  function handleAnswer(answer) {
+    if (showingExplanation || transitioning || finished) return;
+
+    var prob = problems[currentProblem];
+    var blank = prob.blanks[currentBlank];
+    var state = blankStates[currentProblem][currentBlank];
+    var isCorrect = answer === blank.answer;
+
+    state.answered = true;
+    state.userAnswer = answer;
+    state.correct = isCorrect;
+
+    if (isCorrect) {
+      state.animClass = 'correct';
+      streak++;
+      totalCorrect++;
+      xpEarned += 10;
+
+      if (streak === 5) {
+        xpEarned += 10;
+        showXpPopup('+10 XP');
+      } else if (streak === 10) {
+        xpEarned += 25;
+        showXpPopup('+25 XP');
+      }
+
+      render();
+
+      // Move to next blank or next problem
+      setTimeout(function() {
+        if (currentBlank < prob.blanks.length - 1) {
+          currentBlank++;
+          render();
+        } else {
+          goNextProblem();
+        }
+      }, 500);
+    } else {
+      state.animClass = 'wrong';
+      streak = 0;
+      render();
+
+      if (DATA.showExplanationOnWrong && blank.concept) {
+        showingExplanation = true;
+        render();
+
+        explanationTimer = setTimeout(function() {
+          showingExplanation = false;
+          state.animClass = 'correct';
+          state.userAnswer = blank.answer;
+          state.correct = false; // still wrong for scoring
+          render();
+
+          setTimeout(function() {
+            if (currentBlank < prob.blanks.length - 1) {
+              currentBlank++;
+              render();
+            } else {
+              goNextProblem();
+            }
+          }, 400);
+        }, 3000);
+      } else {
+        setTimeout(function() {
+          state.animClass = 'correct';
+          state.userAnswer = blank.answer;
+          render();
+
+          setTimeout(function() {
+            if (currentBlank < prob.blanks.length - 1) {
+              currentBlank++;
+              render();
+            } else {
+              goNextProblem();
+            }
+          }, 400);
+        }, 800);
+      }
+    }
+  }
+
+  function buildSentence(prob, probIdx) {
+    var segments = prob.sentence.split('___');
+    var html = '';
+    for (var i = 0; i < segments.length; i++) {
+      html += '<span>' + esc(segments[i]) + '</span>';
+      if (i < prob.blanks.length) {
+        var state = blankStates[probIdx][i];
+        var cls = 'blank-box';
+        if (state.answered) {
+          cls += ' ' + state.animClass;
+        } else if (i === currentBlank && probIdx === currentProblem) {
+          cls += ' active';
+        } else {
+          cls += ' filled';
+        }
+        var content = state.answered ? esc(state.userAnswer) : '&nbsp;&nbsp;&nbsp;';
+        html += '<span class="' + cls + '">' + content + '</span>';
+      }
+    }
+    return html;
+  }
+
+  function renderResults() {
+    var accuracy = totalBlanks > 0 ? Math.round((totalCorrect / totalBlanks) * 100) : 0;
+
+    var html = '<div class="results" role="region" aria-label="결과 요약">';
+    html += '<h2>배틀 완료!</h2>';
+    html += '<div class="accuracy">' + accuracy + '%</div>';
+    html += '<div class="xp-total">+' + xpEarned + ' XP 획득</div>';
+
+    html += '<div class="result-list">';
+    for (var i = 0; i < problemResults.length; i++) {
+      var pr = problemResults[i];
+      if (!pr) continue;
+      var allCorrect = true;
+      for (var j = 0; j < pr.blanks.length; j++) {
+        if (!pr.blanks[j].correct) { allCorrect = false; break; }
+      }
+      var icon = allCorrect ? '\u2B55' : '\u274C';
+      var segments = pr.sentence.split('___');
+      var filled = '';
+      for (var s = 0; s < segments.length; s++) {
+        filled += segments[s];
+        if (s < pr.blanks.length) {
+          var b = pr.blanks[s];
+          if (b.correct) {
+            filled += b.answer;
+          } else {
+            filled += b.answer + '(' + b.userAnswer + ')';
+          }
+        }
+      }
+      html += '<div class="result-item">';
+      html += '<span class="result-icon">' + icon + '</span>';
+      html += '<span class="result-sentence">' + esc(filled) + '</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    html += '<button class="btn-restart" onclick="location.reload()" aria-label="다시 하기">다시 하기</button>';
+    html += '</div>';
+
+    app.innerHTML = html;
+  }
+
+  function render() {
+    if (finished) { renderResults(); return; }
+
+    var prob = problems[currentProblem];
+    var answered = countAnswered();
+    var pct = totalBlanks > 0 ? ((answered / totalBlanks) * 100).toFixed(1) : 0;
+
+    var html = '';
+
+    // Top bar
+    html += '<div class="topbar">';
+    html += '<div class="topbar-info"><strong>' + esc(DATA.tierName) + '</strong> Tier ' + DATA.tier + ' \u00B7 Round ' + DATA.roundNumber + '/' + DATA.totalRounds + '</div>';
+    html += '<span class="streak-badge' + (streak < 2 ? ' hidden' : '') + '">\uD83D\uDD25 ' + streak + ' \uC5F0\uC18D</span>';
+    html += '</div>';
+
+    // Timer
+    var hasTimer = DATA.timePerProblem > 0;
+    html += '<div class="timer-wrap' + (hasTimer ? '' : ' hidden') + '">';
+    html += '<div class="timer-fill" style="width:' + (hasTimer ? ((timerRemaining / DATA.timePerProblem) * 100) : 100) + '%"></div>';
+    html += '</div>';
+
+    // Progress
+    html += '<div class="progress-wrap" role="progressbar" aria-valuenow="' + (answered) + '" aria-valuemin="0" aria-valuemax="' + totalBlanks + '">';
+    html += '<div class="progress-fill" style="width:' + pct + '%"></div></div>';
+    html += '<div class="progress-label">\uBB38\uC81C ' + (currentProblem + 1) + '/' + problems.length + '</div>';
+
+    // Sentence card
+    html += '<div class="sentence-card' + (transitioning ? ' slide-enter' : '') + '">';
+    html += '<div class="sentence-flow">' + buildSentence(prob, currentProblem) + '</div>';
+
+    // Translation (shown when all blanks answered)
+    var allBlanksDone = true;
+    for (var b = 0; b < prob.blanks.length; b++) {
+      if (!blankStates[currentProblem][b].answered) { allBlanksDone = false; break; }
+    }
+    html += '<div class="translation' + (allBlanksDone ? ' visible' : '') + '">' + esc(prob.translation) + '</div>';
+    html += '</div>';
+
+    // Explanation
+    var expHidden = !showingExplanation;
+    html += '<div class="explanation-card' + (expHidden ? ' hidden' : '') + '">';
+    if (showingExplanation) {
+      html += '<div class="exp-label">\uD574\uC124</div>';
+      html += '<div>' + esc(prob.explanation) + '</div>';
+    }
+    html += '</div>';
+
+    // Choices or Input
+    var blank = prob.blanks[currentBlank];
+    if (blank && !blankStates[currentProblem][currentBlank].answered) {
+      if (DATA.inputMode === 'input') {
+        html += '<div class="input-area">';
+        html += '<input type="text" class="input-particle" id="particle-input" placeholder="\uC870\uC0AC \uC785\uB825" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">';
+        html += '<button class="btn-submit" id="btn-submit">\uD655\uC778</button>';
+        html += '</div>';
+      } else {
+        html += '<div class="choices-area">';
+        var choices = blank.choices;
+        for (var c = 0; c < choices.length; c++) {
+          html += '<button class="btn-choice" data-choice="' + esc(choices[c]) + '" data-idx="' + c + '">';
+          html += '<span class="key-hint">' + (c + 1) + '</span>';
+          html += esc(choices[c]);
+          html += '</button>';
+        }
+        html += '</div>';
+      }
+    }
+
+    app.innerHTML = html;
+    bindEvents();
+
+    if (hasTimer && !blankStates[currentProblem][0].answered) {
+      // Start timer on first render of new problem
+      if (currentBlank === 0 && !blankStates[currentProblem][0].answered) {
+        startTimer();
+      }
+    }
+
+    // Auto-focus input
+    if (DATA.inputMode === 'input') {
+      var inp = document.getElementById('particle-input');
+      if (inp) setTimeout(function() { inp.focus(); }, 50);
+    }
+  }
+
+  function bindEvents() {
+    // Choice buttons
+    app.querySelectorAll('.btn-choice').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        handleAnswer(btn.dataset.choice);
+      });
+    });
+
+    // Input submit
+    var btnSubmit = document.getElementById('btn-submit');
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', function() {
+        var inp = document.getElementById('particle-input');
+        if (inp && inp.value.trim()) {
+          handleAnswer(inp.value.trim());
+        }
+      });
+    }
+
+    var inp = document.getElementById('particle-input');
+    if (inp) {
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (inp.value.trim()) handleAnswer(inp.value.trim());
+        }
+      });
+    }
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    if (finished || showingExplanation || transitioning) return;
+
+    // Number keys 1-6 for choices
+    if (DATA.inputMode !== 'input') {
+      var num = parseInt(e.key);
+      if (num >= 1 && num <= 6) {
+        var prob = problems[currentProblem];
+        var blank = prob.blanks[currentBlank];
+        if (blank && !blankStates[currentProblem][currentBlank].answered) {
+          if (num <= blank.choices.length) {
+            handleAnswer(blank.choices[num - 1]);
+          }
+        }
+      }
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
