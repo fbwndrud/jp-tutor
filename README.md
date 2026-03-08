@@ -6,11 +6,16 @@
 
 ## 설치
 
-Claude Cowork → **설정** → **플러그인** → **URL로 마켓플레이스 추가**:
+Claude Cowork에서:
 
-```
-https://github.com/fbwndrud/jp-tutor.git
-```
+1. 채팅 입력창 **+** 클릭
+2. **플러그인** → **플러그인 추가**
+3. **개인** 탭 → **+** 클릭
+4. **URL로 마켓플레이스 추가** 선택
+5. URL 입력:
+   ```
+   https://github.com/fbwndrud/jp-tutor.git
+   ```
 
 ## 사용법
 
