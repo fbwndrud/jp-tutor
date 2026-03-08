@@ -20,7 +20,20 @@
   - `jp-tutor/skills/jp/references/templates/dashboard.html` (통계 전용, TTS 불필요)
 - 하나만 고치고 나머지를 빠뜨리지 않는다
 
-### 4. HTML 템플릿 간 디자인 토큰 통일
+### 4. HTML 템플릿 DATA 주입 패턴
+- 모든 템플릿은 `const DATA = null;` 패턴으로 데이터를 주입받음
+- IIFE 앞에 반드시 **방어적 세미콜론** `;(function() {` 사용
+- 이유: 데이터 치환 시 `const DATA = {...}` 뒤에 세미콜론이 빠지면 `{...}(function()` 로 해석되어 "is not a function" 에러 발생
+- 새 템플릿 작성 시 이 패턴 필수:
+  ```js
+  const DATA = null;
+
+  ;(function() {
+    // ...
+  })();
+  ```
+
+### 5. HTML 템플릿 간 디자인 토큰 통일
 - CSS 변수 (--bg, --radius, --shadow 등)는 4개 템플릿 모두 동일하게 유지
 - 폰트: `'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
 - Google Fonts CDN link 포함: `Noto+Sans+JP:wght@400;600;700`
