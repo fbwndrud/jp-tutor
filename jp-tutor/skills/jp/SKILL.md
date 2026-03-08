@@ -36,6 +36,7 @@ description: |
    - "오늘 뭐 하지", "공부 시작" → daily 모드
    - "복습", "에빙하우스" → review 모드
    - "현황", "통계", "대시보드" → dashboard 모드
+   - "게임", "미니게임", "매칭", "퍼즐" → game 모드
 3. **모호한 요청**: 현재 프로필과 최근 학습 이력을 기반으로 추천
 
 ## 초기 설정 (/jp:start)
@@ -74,7 +75,7 @@ description: |
     "hiraStage": 1,
     "kataStage": 0,
     "concepts": {
-      "あ_hira": { "correct": 3, "attempts": 4, "lastReview": "2026-03-08", "nextReview": "2026-03-11" }
+      "あ_hira": { "correct": 3, "attempts": 4, "lastReview": "2026-03-08", "nextReview": "2026-03-11" }  // correct는 float (게임 가중치 반영)
     }
   },
   "vocab": {
@@ -89,7 +90,13 @@ description: |
   "conversation": { "sessions": [] },
   "translation": { "sessions": [] },
   "business": { "modules": {} },
-  "textbook": { "chapters": {} }
+  "textbook": { "chapters": {} },
+  "minigames": {
+    "unlocked": [],
+    "stats": {},
+    "daily_game_played": false,
+    "total_game_minutes_today": 0
+  }
 }
 ```
 
@@ -286,6 +293,8 @@ function speak(text) {
 - **가나 커리큘럼**: `skills/jp/references/curricula/kana.md`
 - **JLPT 커리큘럼**: `skills/jp/references/curricula/japanese-jlpt.md`
 - **비즈니스 커리큘럼**: `skills/jp/references/curricula/business-japanese.md`
+- **게임 추천 시**: `skills/jp/references/game-recommendation.md` 를 읽고 추천 알고리즘을 따릅니다.
+- **게임 규칙 참조 시**: `skills/jp/references/minigame-rules.md` 를 읽고 난이도/XP를 적용합니다.
 
 ## 게이미피케이션 시스템
 
@@ -301,6 +310,8 @@ function speak(text) {
 | 미니 챌린지 완료 | +20 |
 | 작문/회화 세션 완료 | +25 |
 | 복습 세션 완료 (/jp:review) | +20 |
+| 미니게임 완료 (티어 평균) | +15~50 (티어별) |
+| 미니게임 퍼펙트/보너스 | +10~20 |
 
 ### 레벨 시스템 (30단계)
 
